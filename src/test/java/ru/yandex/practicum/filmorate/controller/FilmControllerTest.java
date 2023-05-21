@@ -1,13 +1,10 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
-import java.net.http.HttpClient;
 import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.*;
