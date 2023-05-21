@@ -6,7 +6,6 @@ import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
 import java.time.LocalDate;
 import java.util.HashMap;
 
@@ -18,7 +17,7 @@ public class FilmController {
     private int id = 0;
 
     @PostMapping
-    public Film addFilm(HttpServletRequest request, @Valid @RequestBody Film film) {
+    public Film addFilm(HttpServletRequest request, @RequestBody Film film) {
         if (film.getName().isBlank() || film.getName() == null) {
             log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}' " +
                             "Название фильма не может быть пустым",
@@ -51,7 +50,7 @@ public class FilmController {
     }
 
     @PutMapping
-    public Film updateFilm(HttpServletRequest request, @Valid @RequestBody Film film) {
+    public Film updateFilm(HttpServletRequest request, @RequestBody Film film) {
         if (film.getName().isBlank() || film.getName() == null) {
             log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}' " +
                             "Название фильма не может быть пустым",

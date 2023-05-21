@@ -6,7 +6,6 @@ import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
 import java.time.LocalDate;
 import java.util.HashMap;
 
@@ -18,7 +17,7 @@ public class UserController {
     private int id = 0;
 
     @PostMapping
-    public User addUser(HttpServletRequest request, @Valid @RequestBody User user) {
+    public User addUser(HttpServletRequest request, @RequestBody User user) {
         if (user.getEmail().isBlank() || user.getEmail() == null || user.getEmail().indexOf("@") == -1) {
             log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}' " +
                             "Электронная почта не может быть пустой и должна содержать символ @",
@@ -46,7 +45,7 @@ public class UserController {
     }
 
     @PutMapping
-    public User updateUser(HttpServletRequest request, @Valid @RequestBody User user) {
+    public User updateUser(HttpServletRequest request, @RequestBody User user) {
         if (user.getEmail().isBlank() || user.getEmail() == null || user.getEmail().indexOf("@") == -1) {
             log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}' " +
                             "Электронная почта не может быть пустой и должна содержать символ ",
