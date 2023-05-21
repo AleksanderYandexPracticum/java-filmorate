@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.HashMap;
 
 @Slf4j
@@ -87,9 +88,9 @@ public class FilmController {
     }
 
     @GetMapping
-    public HashMap<Integer, Film> getAllFilm(HttpServletRequest request) {
+    public Collection<Film> getAllFilm(HttpServletRequest request) {
         log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
-        return listFilm;
+        return listFilm.values();
     }
 }

@@ -151,5 +151,4 @@ class FilmControllerTest {
                 });
         assertEquals("Продолжительность фильма должна быть положительной", exception3.getMessage());
     }
-
 }

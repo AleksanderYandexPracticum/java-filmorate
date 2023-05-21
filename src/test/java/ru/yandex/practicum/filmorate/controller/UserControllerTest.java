@@ -86,7 +86,6 @@ class UserControllerTest {
                         if (!listUser.containsKey(user.getId())) {
                             throw new ValidationException("Нет такого идентификатора");
                         }
-
                     }
                 });
         assertEquals("Нет такого идентификатора", exception4.getMessage());
@@ -170,8 +169,5 @@ class UserControllerTest {
                     }
                 });
         assertEquals("Нет такого идентификатора", exception4.getMessage());
-
     }
-
-
 }

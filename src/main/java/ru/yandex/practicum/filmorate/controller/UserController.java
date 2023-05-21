@@ -7,13 +7,14 @@ import ru.yandex.practicum.filmorate.model.User;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.HashMap;
 
 @Slf4j
 @RestController()
 @RequestMapping("/users")
 public class UserController {
-    private HashMap<Integer, User> listUser = new HashMap<>();
+    private HashMap<Integer, User> listUsers = new HashMap<>();
     private int id = 0;
 
     @PostMapping
@@ -38,7 +39,7 @@ public class UserController {
             throw new ValidationException("Дата рождения не может быть в будущем");
         }
         user.setId(++id);
-        listUser.put(id, user);
+        listUsers.put(id, user);
         log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
         return user;
@@ -65,22 +66,23 @@ public class UserController {
                     request.getMethod(), request.getRequestURI(), request.getQueryString());
             throw new ValidationException("Дата рождения не может быть в будущем");
         }
-        if (!listUser.containsKey(user.getId())) {
+        if (!listUsers.containsKey(user.getId())) {
             log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}' " +
                             "Нет такого идентификатора",
                     request.getMethod(), request.getRequestURI(), request.getQueryString());
             throw new ValidationException("Нет такого идентификатора");
         }
-        listUser.put(user.getId(), user);
+        listUsers.put(user.getId(), user);
         log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
         return user;
     }
 
     @GetMapping
-    public HashMap<Integer, User> getAllUser(HttpServletRequest request) {
+    public Collection<User> getAllUser(HttpServletRequest request) {
         log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
-        return listUser;
+
+        return listUsers.values();
     }
 }
