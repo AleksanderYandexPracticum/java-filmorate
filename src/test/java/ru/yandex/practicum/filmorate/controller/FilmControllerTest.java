@@ -22,7 +22,7 @@ class FilmControllerTest {
                 new Executable() {
                     @Override
                     public void execute() {
-                        if (film.getName().isBlank() || film.getName() == null) {
+                        if (film.getName() == null || film.getName().isBlank()) {
                             throw new ValidationException("Название фильма не может быть пустым");
                         }
                     }
@@ -93,7 +93,7 @@ class FilmControllerTest {
                 new Executable() {
                     @Override
                     public void execute() {
-                        if (film.getName().isBlank() || film.getName() == null) {
+                        if (film.getName() == null || film.getName().isBlank()) {
                             throw new ValidationException("Название фильма не может быть пустым");
                         }
                     }

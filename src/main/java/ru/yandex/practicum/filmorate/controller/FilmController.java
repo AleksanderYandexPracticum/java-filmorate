@@ -18,7 +18,7 @@ public class FilmController {
 
     @PostMapping
     public Film addFilm(HttpServletRequest request, @RequestBody Film film) {
-        if (film.getName().isBlank() || film.getName() == null) {
+        if (film.getName() == null || film.getName().isBlank()) {
             log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}' " +
                             "Название фильма не может быть пустым",
                     request.getMethod(), request.getRequestURI(), request.getQueryString());
@@ -51,7 +51,7 @@ public class FilmController {
 
     @PutMapping
     public Film updateFilm(HttpServletRequest request, @RequestBody Film film) {
-        if (film.getName().isBlank() || film.getName() == null) {
+        if (film.getName() == null || film.getName().isBlank()) {
             log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}' " +
                             "Название фильма не может быть пустым",
                     request.getMethod(), request.getRequestURI(), request.getQueryString());

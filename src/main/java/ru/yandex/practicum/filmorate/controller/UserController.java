@@ -18,19 +18,19 @@ public class UserController {
 
     @PostMapping
     public User addUser(HttpServletRequest request, @RequestBody User user) {
-        if (user.getEmail().isBlank() || user.getEmail() == null || user.getEmail().indexOf("@") == -1) {
+        if (user.getEmail() == null || user.getEmail().isBlank() || user.getEmail().indexOf("@") == -1) {
             log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}' " +
                             "Электронная почта не может быть пустой и должна содержать символ @",
                     request.getMethod(), request.getRequestURI(), request.getQueryString());
             throw new ValidationException("Электронная почта не может быть пустой и должна содержать символ @");
         }
-        if (user.getLogin().isBlank() || user.getLogin() == null || user.getLogin().indexOf(" ") != -1) {
+        if (user.getLogin() == null || user.getLogin().isBlank() || user.getLogin().indexOf(" ") != -1) {
             log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}' " +
                             "Логин не может быть пустым и содержать пробелы",
                     request.getMethod(), request.getRequestURI(), request.getQueryString());
             throw new ValidationException("Логин не может быть пустым и содержать пробелы");
         }
-        if (user.getName().isBlank() || user.getName() == null) user.setName(user.getLogin());
+        if (user.getName() == null || user.getName().isBlank()) user.setName(user.getLogin());
         if (user.getBirthday().isAfter(LocalDate.now())) {
             log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}' " +
                             "Дата рождения не может быть в будущем",
@@ -46,19 +46,19 @@ public class UserController {
 
     @PutMapping
     public User updateUser(HttpServletRequest request, @RequestBody User user) {
-        if (user.getEmail().isBlank() || user.getEmail() == null || user.getEmail().indexOf("@") == -1) {
+        if (user.getEmail() == null || user.getEmail().isBlank() || user.getEmail().indexOf("@") == -1) {
             log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}' " +
                             "Электронная почта не может быть пустой и должна содержать символ ",
                     request.getMethod(), request.getRequestURI(), request.getQueryString());
             throw new ValidationException("Электронная почта не может быть пустой и должна содержать символ @");
         }
-        if (user.getLogin().isBlank() || user.getLogin() == null || user.getLogin().indexOf(" ") != -1) {
+        if (user.getLogin() == null || user.getLogin().isBlank() || user.getLogin().indexOf(" ") != -1) {
             log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}' " +
                             "Логин не может быть пустым и содержать пробелы",
                     request.getMethod(), request.getRequestURI(), request.getQueryString());
             throw new ValidationException("Логин не может быть пустым и содержать пробелы");
         }
-        if (user.getName().isBlank() || user.getName() == null) user.setName(user.getLogin());
+        if (user.getName() == null || user.getName().isBlank()) user.setName(user.getLogin());
         if (user.getBirthday().isAfter(LocalDate.now())) {
             log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}' " +
                             "Дата рождения не может быть в будущем",

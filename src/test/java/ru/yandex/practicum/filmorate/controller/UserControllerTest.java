@@ -24,7 +24,7 @@ class UserControllerTest {
                 new Executable() {
                     @Override
                     public void execute() {
-                        if (user.getEmail().isBlank() || user.getEmail() == null || user.getEmail().indexOf("@") == -1) {
+                        if (user.getEmail() == null || user.getEmail().isBlank() || user.getEmail().indexOf("@") == -1) {
                             throw new ValidationException("Электронная почта не может быть пустой и должна содержать символ @");
                         }
                     }
@@ -40,7 +40,7 @@ class UserControllerTest {
                 new Executable() {
                     @Override
                     public void execute() {
-                        if (user1.getLogin().isBlank() || user1.getLogin() == null || user1.getLogin().indexOf(" ") != -1) {
+                        if (user1.getLogin() == null || user1.getLogin().isBlank() || user1.getLogin().indexOf(" ") != -1) {
                             throw new ValidationException("Логин не может быть пустым и содержать пробелы");
                         }
                     }
@@ -53,7 +53,7 @@ class UserControllerTest {
         user2.setEmail("mail@mail.ru");
         user2.setBirthday(LocalDate.of(1946, 8, 20));
 
-        if (user2.getName().isBlank() || user2.getName() == null) user2.setName(user2.getLogin());
+        if (user2.getName() == null || user2.getName().isBlank()) user2.setName(user2.getLogin());
 
         assertEquals(user2.getName(), user2.getLogin());
 
@@ -104,7 +104,7 @@ class UserControllerTest {
                 new Executable() {
                     @Override
                     public void execute() {
-                        if (user.getEmail().isBlank() || user.getEmail() == null || user.getEmail().indexOf("@") == -1) {
+                        if (user.getEmail() == null || user.getEmail().isBlank() || user.getEmail().indexOf("@") == -1) {
                             throw new ValidationException("Электронная почта не может быть пустой и должна содержать символ @");
                         }
                     }
@@ -120,7 +120,7 @@ class UserControllerTest {
                 new Executable() {
                     @Override
                     public void execute() {
-                        if (user1.getLogin().isBlank() || user1.getLogin() == null || user1.getLogin().indexOf(" ") != -1) {
+                        if (user1.getLogin() == null || user1.getLogin().isBlank() || user1.getLogin().indexOf(" ") != -1) {
                             throw new ValidationException("Логин не может быть пустым и содержать пробелы");
                         }
                     }
@@ -133,7 +133,7 @@ class UserControllerTest {
         user2.setEmail("mail@mail.ru");
         user2.setBirthday(LocalDate.of(1946, 8, 20));
 
-        if (user2.getName().isBlank() || user2.getName() == null) user2.setName(user2.getLogin());
+        if (user2.getName() == null || user2.getName().isBlank()) user2.setName(user2.getLogin());
 
         assertEquals(user2.getName(), user2.getLogin());
 
