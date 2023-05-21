@@ -51,7 +51,7 @@ public class FilmController {
     }
 
     @PutMapping
-    public Film updateFilm(HttpServletRequest request,@Valid @RequestBody Film film) {
+    public Film updateFilm(HttpServletRequest request, @Valid @RequestBody Film film) {
         if (film.getName().isBlank() || film.getName() == null) {
             log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}' " +
                             "Название фильма не может быть пустым",
