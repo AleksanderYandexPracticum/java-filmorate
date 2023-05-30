@@ -22,6 +22,10 @@ public class FilmController {
         this.filmService = filmService;
     }
 
+    public FilmService getFilmService() {
+        return filmService;
+    }
+
     @PostMapping
     public Film addFilm(HttpServletRequest request, @RequestBody Film film) {
         log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",

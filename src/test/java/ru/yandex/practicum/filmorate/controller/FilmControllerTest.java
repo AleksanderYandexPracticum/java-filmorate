@@ -1,8 +1,10 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.film.FilmService.FilmService;
 
 import java.time.LocalDate;
 
@@ -10,7 +12,10 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class FilmControllerTest {
 
-//    FilmController filmController = new FilmController();
+//    @Autowired
+//    FilmService filmService;
+//    @Autowired
+//    FilmController filmController;
 
     @Test
     void addFilm() {
@@ -22,7 +27,7 @@ class FilmControllerTest {
 //        film.setDuration(100);
 //
 //        final ValidationException exception = assertThrows(ValidationException.class,
-//                () -> filmController.validationFilm(film));
+//                () -> filmController.getFilmService().validationFilm(film));
 //        assertEquals("Название фильма не может быть пустым", exception.getMessage());
 //
 //        Film film1 = new Film();
