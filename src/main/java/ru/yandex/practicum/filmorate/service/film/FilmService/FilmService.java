@@ -73,11 +73,11 @@ public class FilmService {
 
     public List<Film> getFilms(int count) {  //возвращает список из первых count фильмов по количеству лайков.
         // Если значение параметра count не задано, верните первые 10.
-        List<Film> films = new ArrayList<>(inMemoryFilmStorage.getListFilms().values()).
-                stream().
-                sorted((p0, p1) -> ((Integer) p1.getLikes().size()).compareTo(p0.getLikes().size())).
-                limit(count).
-                collect(Collectors.toList());
+        List<Film> films = new ArrayList<>(inMemoryFilmStorage.getListFilms().values())
+                .stream()
+                .sorted((p0, p1) -> ((Integer) p1.getLikes().size()).compareTo(p0.getLikes().size()))
+                .limit(count)
+                .collect(Collectors.toList());
         return films;
     }
 }
