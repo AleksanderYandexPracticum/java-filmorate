@@ -1,14 +1,14 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.service.film.FilmService.FilmService;
-
-import java.time.LocalDate;
-
-import static org.junit.jupiter.api.Assertions.*;
+//import org.springframework.beans.factory.annotation.Autowired;
+//import ru.yandex.practicum.filmorate.exception.ValidationException;
+//import ru.yandex.practicum.filmorate.model.Film;
+//import ru.yandex.practicum.filmorate.service.film.FilmService.FilmService;
+//
+//import java.time.LocalDate;
+//
+//import static org.junit.jupiter.api.Assertions.*;
 
 class FilmControllerTest {
 
