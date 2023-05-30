@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.service.user.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage.InMemoryUserStorage;
@@ -10,6 +11,7 @@ import ru.yandex.practicum.filmorate.storage.user.UserStorage.UserStorage;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -24,7 +26,7 @@ public class UserService {
         this.inMemoryUserStorage = (InMemoryUserStorage) userStorage;
     }
 
-    public void validationUser(User user) throws ValidationException {
+    public void validationUser(User user) {
         if (user.getEmail() == null || user.getEmail().isBlank() || user.getEmail().indexOf("@") == -1) {
             log.info("Электронная почта не может быть пустой и должна содержать символ @");
             throw new ValidationException("Электронная почта не может быть пустой и должна содержать символ @");
@@ -40,55 +42,53 @@ public class UserService {
         }
     }
 
-    public void validationIdUser(User user) throws ValidationException {
+    public void validationIdUser(User user) {
         if (!inMemoryUserStorage.getListUsers().containsKey(user.getId())) {
             log.info("Нет такого идентификатора");
-            throw new ValidationException(String.format("Нет такого идентификатора № s%", user.getId()));
+            throw new NotFoundException(String.format("Нет такого идентификатора № s%", user.getId()));
         }
     }
 
-    public void validationIdUser(Long id) throws ValidationException {
-        if (!inMemoryUserStorage.getListUsers().containsKey(id)) {
+    public void validationIdUser(Long id) {
+        if (!inMemoryUserStorage.getListUsers().containsKey(id.intValue())) {
             log.info("Нет такого идентификатора");
-            throw new ValidationException(String.format("Нет такого идентификатора № s%", id));
+            throw new NotFoundException(String.format("Нет такого идентификатора № s%", id));
         }
     }
 
     public User getUser(Long id) {  //получение данных о пользователе по иго уникальному идентификатору
-        validationIdUser(id);
-        return inMemoryUserStorage.getListUsers().get(id);
+        return inMemoryUserStorage.getListUsers().get(id.intValue());
     }
 
     public void addFriend(Long id, Long friendId) {  //добавление в друзья
-        validationIdUser(id);
-        validationIdUser(friendId);
-        inMemoryUserStorage.getListUsers().get(id).getFriends().add(friendId);
-        inMemoryUserStorage.getListUsers().get(friendId).getFriends().add(id);
+        inMemoryUserStorage.getListUsers().get(id.intValue()).getFriends().add(friendId);
+        inMemoryUserStorage.getListUsers().get(friendId.intValue()).getFriends().add(id);
     }
 
     public void deleteFriend(Long id, Long friendId) {  //удаление из друзей
-        validationIdUser(id);
-        validationIdUser(friendId);
-        inMemoryUserStorage.getListUsers().get(id).getFriends().remove(friendId);
-        inMemoryUserStorage.getListUsers().get(friendId).getFriends().remove(id);
+        inMemoryUserStorage.getListUsers().get(id.intValue()).getFriends().remove(friendId);
+        inMemoryUserStorage.getListUsers().get(friendId.intValue()).getFriends().remove(id);
     }
 
-    public List<Long> getAllFriendsCurrentUser(Long id) { //возвращаем список пользователей, являющихся его друзьями
-        validationIdUser(id);
-        List<Long> list = new ArrayList<>(inMemoryUserStorage.getListUsers().get(id).getFriends());
-        return list;
-    }
-
-    public List<Long> getListFriendsCurrentUser(Long id, Long friendId) {  //список друзей, общих с другим пользователем
-        validationIdUser(id);
-        validationIdUser(friendId);
-        Set<Long> setId = inMemoryUserStorage.getListUsers().get(id).getFriends();
-        Set<Long> setFriendId = inMemoryUserStorage.getListUsers().get(friendId).getFriends();
-        setId.retainAll(setFriendId);
-        if (setId.size() == 0) {
-            throw new ValidationException("Общих друзей нет");
+    public List<User> getAllFriendsCurrentUser(Long id) { //возвращаем список пользователей, являющихся его друзьями
+        List<Long> listFriendId = new ArrayList<>(inMemoryUserStorage.getListUsers().get(id.intValue()).getFriends());
+        List<User> allFriends = new ArrayList<>();
+        for (Long friendId : listFriendId) {
+            allFriends.add(inMemoryUserStorage.getListUsers().get(friendId.intValue()));
         }
-        List<Long> list = new ArrayList<>(setId);
-        return list;
+        return allFriends;
+    }
+
+    public List<User> getCommonFriendsList(Long id, Long otherId) {  //список друзей, общих с другим пользователем
+        Set<Long> setId = new HashSet<>(inMemoryUserStorage.getListUsers().get(id.intValue()).getFriends());
+        Set<Long> setFriendId = inMemoryUserStorage.getListUsers().get(otherId.intValue()).getFriends();
+        setId.retainAll(setFriendId);
+
+        List<User> commonFriends = new ArrayList<>();
+
+        for (Long friendId : setId) {
+            commonFriends.add(inMemoryUserStorage.getListUsers().get(friendId.intValue()));
+        }
+        return commonFriends;
     }
 }

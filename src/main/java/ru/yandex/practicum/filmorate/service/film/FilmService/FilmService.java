@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.service.film.FilmService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage.FilmStorage;
@@ -10,7 +11,6 @@ import ru.yandex.practicum.filmorate.storage.film.FilmStorage.InMemoryFilmStorag
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,7 +25,7 @@ public class FilmService {
     }
 
 
-    public void validationFilm(Film film) throws ValidationException {
+    public void validationFilm(Film film) {
 
         if (film.getName() == null || film.getName().isBlank()) {
             log.info("Название фильма не может быть пустым");
@@ -45,46 +45,37 @@ public class FilmService {
         }
     }
 
-    public void validationIdFilm(Film film) throws ValidationException {
+    public void validationIdFilm(Film film) {
         if (!inMemoryFilmStorage.getListFilms().containsKey(film.getId())) {
             log.info("Нет такого идентификатора");
-            throw new ValidationException("Нет такого идентификатора");
+            throw new NotFoundException("Нет такого идентификатора");
         }
     }
 
-    public void validationIdFilm(Long id) throws ValidationException {
-        if (!inMemoryFilmStorage.getListFilms().containsKey(id)) {
+    public void validationIdFilm(Long id) {
+        if (!inMemoryFilmStorage.getListFilms().containsKey(id.intValue())) {
             log.info("Нет такого идентификатора");
-            throw new ValidationException(String.format("Нет такого идентификатора № s%", id));
+            throw new NotFoundException(String.format("Нет такого идентификатора № s%", id));
         }
     }
 
     public Film getFilm(Long id) {  //получение данных о фильме по иго уникальному идентификатору
-        validationIdFilm(id);
-        return inMemoryFilmStorage.getListFilms().get(id);
+        return inMemoryFilmStorage.getListFilms().get(id.intValue());
     }
 
     public void addLike(Long id, Long userId) {  //пользователь ставит лайк фильму
-        validationIdFilm(id);
-        inMemoryFilmStorage.getListFilms().get(id).getLikes().add(userId);
+        inMemoryFilmStorage.getListFilms().get(id.intValue()).getLikes().add(userId);
     }
 
     public void deleteLike(Long id, Long userId) {  //пользователь удаляет лайк
-        validationIdFilm(id);
-        inMemoryFilmStorage.getListFilms().get(id).getLikes().remove(userId);
+        inMemoryFilmStorage.getListFilms().get(id.intValue()).getLikes().remove(userId);
     }
 
     public List<Film> getFilms(int count) {  //возвращает список из первых count фильмов по количеству лайков.
         // Если значение параметра count не задано, верните первые 10.
-        if (inMemoryFilmStorage.getListFilms() == null || inMemoryFilmStorage.getListFilms().size() == 0) {
-            throw new ValidationException("Фильмов нет");
-        }
-//        if (count == 0) {
-//            count = 10;
-//        }
         List<Film> films = new ArrayList<>(inMemoryFilmStorage.getListFilms().values()).
                 stream().
-                sorted(Comparator.comparing(p0 -> ((Integer) p0.getLikes().size()))).
+                sorted((p0, p1) -> ((Integer) p1.getLikes().size()).compareTo(p0.getLikes().size())).
                 limit(count).
                 collect(Collectors.toList());
         return films;

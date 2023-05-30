@@ -18,10 +18,6 @@ public class InMemoryFilmStorage implements FilmStorage {
         return listFilms;
     }
 
-    public int getId() {
-        return id;
-    }
-
     @Override
     public Film add(Film film) {
         film.setId(++id);
@@ -38,7 +34,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public Film update(Film film) {
         listFilms.put(film.getId(), film);
-        return null;
+        return film;
     }
 
     @Override
