@@ -31,7 +31,7 @@ public class FilmController {
         log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
         filmService.validationFilm(film);
-        Film returnFilm = filmService.inMemoryFilmStorage.add(film);
+        Film returnFilm = filmService.getInMemoryFilmStorage().add(film);
         return returnFilm;
     }
 
@@ -41,7 +41,7 @@ public class FilmController {
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
         filmService.validationFilm(film);
         filmService.validationIdFilm(film);
-        Film returnFilm = filmService.inMemoryFilmStorage.delete(film);
+        Film returnFilm = filmService.getInMemoryFilmStorage().delete(film);
         return returnFilm;
     }
 
@@ -51,7 +51,7 @@ public class FilmController {
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
         filmService.validationFilm(film);
         filmService.validationIdFilm(film);
-        Film returnFilm = filmService.inMemoryFilmStorage.update(film);
+        Film returnFilm = filmService.getInMemoryFilmStorage().update(film);
         return returnFilm;
     }
 
@@ -59,11 +59,11 @@ public class FilmController {
     public List<Film> getAllFilm(HttpServletRequest request) {
         log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
-        return new ArrayList<>(filmService.inMemoryFilmStorage.getListFilms().values());
+        return new ArrayList<>(filmService.getInMemoryFilmStorage().getListFilms().values());
     }
 
     @GetMapping("/{id}")
-    public Film getFilmInService(HttpServletRequest request, @PathVariable("id") Long id) {
+    public Film getFilmById(HttpServletRequest request, @PathVariable("id") Long id) {
         log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
         filmService.validationIdFilm(id);
@@ -88,8 +88,8 @@ public class FilmController {
     }
 
     @GetMapping("/popular")
-    public List<Film> getFilmInService(HttpServletRequest request,
-                                       @RequestParam(defaultValue = "10") int count) {
+    public List<Film> getPopularFilms(HttpServletRequest request,
+                                      @RequestParam(defaultValue = "10") int count) {
         log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
         return filmService.getFilms(count);

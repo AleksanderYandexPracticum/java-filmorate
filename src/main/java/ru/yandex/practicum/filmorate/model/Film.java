@@ -13,5 +13,5 @@ public class Film {
     private String description;
     private LocalDate releaseDate;
     private long duration;
-    private Set<Long> likes = new HashSet<>();  // Храним id тех кто лайкнул
+    private Set<Long> userIdsWhoLiked = new HashSet<>();  // Храним id тех кто лайкнул
 }

@@ -23,12 +23,16 @@ public class UserController {
         this.userService = userService;
     }
 
+    public UserService getUserService() {
+        return userService;
+    }
+
     @PostMapping
     public User addUser(HttpServletRequest request, @RequestBody User user) {
         log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
         userService.validationUser(user);
-        User returnUser = userService.inMemoryUserStorage.add(user);
+        User returnUser = userService.getInMemoryUserStorage().add(user);
         return returnUser;
     }
 
@@ -38,7 +42,7 @@ public class UserController {
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
         userService.validationUser(user);
         userService.validationIdUser(user);
-        User returnUser = userService.inMemoryUserStorage.delete(user);
+        User returnUser = userService.getInMemoryUserStorage().delete(user);
         return returnUser;
     }
 
@@ -48,7 +52,7 @@ public class UserController {
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
         userService.validationUser(user);
         userService.validationIdUser(user);
-        User returnUser = userService.inMemoryUserStorage.update(user);
+        User returnUser = userService.getInMemoryUserStorage().update(user);
         return returnUser;
     }
 
@@ -57,11 +61,11 @@ public class UserController {
         log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
 
-        return new ArrayList<>(userService.inMemoryUserStorage.getListUsers().values());
+        return new ArrayList<>(userService.getInMemoryUserStorage().getListUsers().values());
     }
 
     @GetMapping("/{id}")
-    public User getUserInService(HttpServletRequest request, @PathVariable("id") Long id) {
+    public User getUser(HttpServletRequest request, @PathVariable("id") Long id) {
         log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
         userService.validationIdUser(id);
@@ -69,9 +73,9 @@ public class UserController {
     }
 
     @PutMapping("/{id}/friends/{friendId}")
-    public void addFriendInService(HttpServletRequest request,
-                                   @PathVariable("id") Long id,
-                                   @PathVariable("friendId") Long friendId) {
+    public void addFriend(HttpServletRequest request,
+                          @PathVariable("id") Long id,
+                          @PathVariable("friendId") Long friendId) {
         log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
         userService.validationIdUser(id);
@@ -80,9 +84,9 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}/friends/{friendId}")
-    public void deleteFriendInService(HttpServletRequest request,
-                                      @PathVariable("id") Long id,
-                                      @PathVariable("friendId") Long friendId) {
+    public void deleteFriend(HttpServletRequest request,
+                             @PathVariable("id") Long id,
+                             @PathVariable("friendId") Long friendId) {
         log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
         userService.validationIdUser(id);
@@ -91,7 +95,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}/friends")
-    public List<User> getAllFriendsCurrentUserInService(HttpServletRequest request, @PathVariable("id") Long id) {
+    public List<User> getAllFriendsCurrentUser(HttpServletRequest request, @PathVariable("id") Long id) {
         log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
         userService.validationIdUser(id);
@@ -99,9 +103,9 @@ public class UserController {
     }
 
     @GetMapping("/{id}/friends/common/{otherId}")
-    public List<User> getCommonFriendsListInService(HttpServletRequest request,
-                                                    @PathVariable("id") Long id,
-                                                    @PathVariable("otherId") Long otherId) {
+    public List<User> getCommonFriendsList(HttpServletRequest request,
+                                           @PathVariable("id") Long id,
+                                           @PathVariable("otherId") Long otherId) {
         log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
 
