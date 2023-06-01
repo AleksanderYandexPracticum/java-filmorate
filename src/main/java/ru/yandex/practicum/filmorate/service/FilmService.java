@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.service.film.FilmService;
+package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,8 +10,7 @@ import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -22,10 +21,6 @@ public class FilmService {
     @Autowired
     public FilmService(FilmStorage filmStorage) {
         this.inMemoryFilmStorage = (InMemoryFilmStorage) filmStorage;
-    }
-
-    public InMemoryFilmStorage getInMemoryFilmStorage() {
-        return inMemoryFilmStorage;
     }
 
     public void validationFilm(Film film) {
@@ -82,5 +77,21 @@ public class FilmService {
                 .limit(count)
                 .collect(Collectors.toList());
         return films;
+    }
+
+    public Film addFilm(Film film) {
+        return inMemoryFilmStorage.add(film);
+    }
+
+    public Film deleteFilm(Film film) {
+        return inMemoryFilmStorage.delete(film);
+    }
+
+    public Film updateFilm(Film film) {
+        return inMemoryFilmStorage.update(film);
+    }
+
+    public Collection<Film> getAllFilm() {
+        return inMemoryFilmStorage.getListFilms().values();
     }
 }

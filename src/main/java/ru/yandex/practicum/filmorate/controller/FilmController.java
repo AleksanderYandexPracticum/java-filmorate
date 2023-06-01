@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.service.film.FilmService.FilmService;
+import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
@@ -31,7 +31,7 @@ public class FilmController {
         log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
         filmService.validationFilm(film);
-        Film returnFilm = filmService.getInMemoryFilmStorage().add(film);
+        Film returnFilm = filmService.addFilm(film);
         return returnFilm;
     }
 
@@ -41,7 +41,7 @@ public class FilmController {
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
         filmService.validationFilm(film);
         filmService.validationIdFilm(film);
-        Film returnFilm = filmService.getInMemoryFilmStorage().delete(film);
+        Film returnFilm = filmService.deleteFilm(film);
         return returnFilm;
     }
 
@@ -51,7 +51,7 @@ public class FilmController {
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
         filmService.validationFilm(film);
         filmService.validationIdFilm(film);
-        Film returnFilm = filmService.getInMemoryFilmStorage().update(film);
+        Film returnFilm = filmService.updateFilm(film);
         return returnFilm;
     }
 
@@ -59,7 +59,7 @@ public class FilmController {
     public List<Film> getAllFilm(HttpServletRequest request) {
         log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
-        return new ArrayList<>(filmService.getInMemoryFilmStorage().getListFilms().values());
+        return new ArrayList<>(filmService.getAllFilm());
     }
 
     @GetMapping("/{id}")

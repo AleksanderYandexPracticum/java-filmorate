@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.service.user.UserService;
+package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,10 +10,7 @@ import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -24,10 +21,6 @@ public class UserService {
     @Autowired
     public UserService(UserStorage userStorage) {
         this.inMemoryUserStorage = (InMemoryUserStorage) userStorage;
-    }
-
-    public InMemoryUserStorage getInMemoryUserStorage() {
-        return inMemoryUserStorage;
     }
 
     public void validationUser(User user) {
@@ -94,5 +87,21 @@ public class UserService {
             commonFriends.add(inMemoryUserStorage.getListUsers().get(friendId.intValue()));
         }
         return commonFriends;
+    }
+
+    public User addUser(User user) {
+        return inMemoryUserStorage.add(user);
+    }
+
+    public User deleteUser(User user) {
+        return inMemoryUserStorage.delete(user);
+    }
+
+    public User updateUser(User user) {
+        return inMemoryUserStorage.update(user);
+    }
+
+    public Collection<User> getAllUser() {
+        return inMemoryUserStorage.getListUsers().values();
     }
 }

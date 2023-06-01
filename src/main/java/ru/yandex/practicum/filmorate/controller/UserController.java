@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.service.user.UserService.UserService;
+import ru.yandex.practicum.filmorate.service.UserService;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
@@ -32,7 +32,7 @@ public class UserController {
         log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
         userService.validationUser(user);
-        User returnUser = userService.getInMemoryUserStorage().add(user);
+        User returnUser = userService.addUser(user);
         return returnUser;
     }
 
@@ -42,7 +42,7 @@ public class UserController {
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
         userService.validationUser(user);
         userService.validationIdUser(user);
-        User returnUser = userService.getInMemoryUserStorage().delete(user);
+        User returnUser = userService.deleteUser(user);
         return returnUser;
     }
 
@@ -52,7 +52,7 @@ public class UserController {
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
         userService.validationUser(user);
         userService.validationIdUser(user);
-        User returnUser = userService.getInMemoryUserStorage().update(user);
+        User returnUser = userService.updateUser(user);
         return returnUser;
     }
 
@@ -61,7 +61,7 @@ public class UserController {
         log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
 
-        return new ArrayList<>(userService.getInMemoryUserStorage().getListUsers().values());
+        return new ArrayList<>(userService.getAllUser());
     }
 
     @GetMapping("/{id}")
