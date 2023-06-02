@@ -1,74 +1,97 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.servlet.http.HttpServletRequest;
-import java.time.LocalDate;
-import java.util.Collection;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 @RestController()
 @RequestMapping("/films")
 public class FilmController {
-    private HashMap<Integer, Film> listFilm = new HashMap<>();
-    private int id = 0;
+
+    private final FilmService filmService;
+
+    @Autowired
+    public FilmController(FilmService filmService) {
+        this.filmService = filmService;
+    }
+
+    public FilmService getFilmService() {
+        return filmService;
+    }
 
     @PostMapping
     public Film addFilm(HttpServletRequest request, @RequestBody Film film) {
-        validationFilm(film);
-        film.setId(++id);
-        listFilm.put(id, film);
         log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
-        return film;
+        filmService.validationFilm(film);
+        Film returnFilm = filmService.addFilm(film);
+        return returnFilm;
+    }
+
+    @DeleteMapping
+    public Film deleteFilm(HttpServletRequest request, @RequestBody Film film) {
+        log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
+                request.getMethod(), request.getRequestURI(), request.getQueryString());
+        filmService.validationFilm(film);
+        filmService.validationIdFilm(film);
+        Film returnFilm = filmService.deleteFilm(film);
+        return returnFilm;
     }
 
     @PutMapping
     public Film updateFilm(HttpServletRequest request, @RequestBody Film film) {
-        validationFilm(film);
-        validationIdFilm(film);
-
-        listFilm.put(film.getId(), film);
         log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
-        return film;
+        filmService.validationFilm(film);
+        filmService.validationIdFilm(film);
+        Film returnFilm = filmService.updateFilm(film);
+        return returnFilm;
     }
 
     @GetMapping
-    public Collection<Film> getAllFilm(HttpServletRequest request) {
+    public List<Film> getAllFilm(HttpServletRequest request) {
         log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
-        return listFilm.values();
+        return new ArrayList<>(filmService.getAllFilm());
     }
 
-    protected void validationFilm(Film film) throws ValidationException {
-
-        if (film.getName() == null || film.getName().isBlank()) {
-            log.info("Название фильма не может быть пустым");
-            throw new ValidationException("Название фильма не может быть пустым");
-        }
-        if (film.getDescription().length() > 200) {
-            log.info("Максимальная длина описания должна быть — 200 символов");
-            throw new ValidationException("Максимальная длина описания должна быть — 200 символов");
-        }
-        if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
-            log.info("Дата релиза должна быть — не раньше 28 декабря 1895 года");
-            throw new ValidationException("Дата релиза должна быть — не раньше 28 декабря 1895 года");
-        }
-        if (film.getDuration() <= 0) {
-            log.info("Продолжительность фильма должна быть положительной");
-            throw new ValidationException("Продолжительность фильма должна быть положительной");
-        }
+    @GetMapping("/{id}")
+    public Film getFilmById(HttpServletRequest request, @PathVariable("id") Long id) {
+        log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
+                request.getMethod(), request.getRequestURI(), request.getQueryString());
+        filmService.validationIdFilm(id);
+        return filmService.getFilm(id);
     }
 
-    protected void validationIdFilm(Film film) throws ValidationException {
-        if (!listFilm.containsKey(film.getId())) {
-            log.info("Нет такого идентификатора");
-            throw new ValidationException("Нет такого идентификатора");
-        }
+    @PutMapping("/{id}/like/{userId}")
+    public void likeFilm(HttpServletRequest request, @PathVariable("id") Long id, @PathVariable("userId") Long userId) {
+        log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
+                request.getMethod(), request.getRequestURI(), request.getQueryString());
+        filmService.validationIdFilm(id);
+        filmService.addLike(id, userId);
+    }
+
+    @DeleteMapping("/{id}/like/{userId}")
+    public void deleteFilm(HttpServletRequest request, @PathVariable("id") Long id, @PathVariable("userId") Long userId) {
+        log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
+                request.getMethod(), request.getRequestURI(), request.getQueryString());
+        filmService.validationIdFilm(id);
+        filmService.validationIdFilm(userId);
+        filmService.deleteLike(id, userId);
+    }
+
+    @GetMapping("/popular")
+    public List<Film> getPopularFilms(HttpServletRequest request,
+                                      @RequestParam(defaultValue = "10") int count) {
+        log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
+                request.getMethod(), request.getRequestURI(), request.getQueryString());
+        return filmService.getFilms(count);
     }
 }
