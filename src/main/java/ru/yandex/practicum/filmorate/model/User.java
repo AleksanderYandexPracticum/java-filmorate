@@ -14,4 +14,5 @@ public class User {
     private String name;
     private LocalDate birthday;
     private Set<Long> friends = new HashSet<>();  // Храним id друзей
+    private Set<StatusFrienship> frienships = new HashSet<>(); // Храним статусы друзей
 }

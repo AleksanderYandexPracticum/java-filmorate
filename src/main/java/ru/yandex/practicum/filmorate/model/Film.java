@@ -14,4 +14,6 @@ public class Film {
     private LocalDate releaseDate;
     private long duration;
     private Set<Long> userIdsWhoLiked = new HashSet<>();  // Храним id тех кто лайкнул
+    private Set<Genre> genre = new HashSet<>(); // Храним жанры
+    private Rating rating;  // Храним рейтинг
 }
