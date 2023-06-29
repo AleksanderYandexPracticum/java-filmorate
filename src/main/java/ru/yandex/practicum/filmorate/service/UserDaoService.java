@@ -4,24 +4,24 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.dao.UserDbStorage;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.time.LocalDate;
 import java.util.*;
 
 @Slf4j
-@Service
-public class UserService {
+@Service("userDaoService")
+public class UserDaoService {
 
-    private final InMemoryUserStorage inMemoryUserStorage;
+    private final UserDbStorage userDbStorage;
 
     @Autowired
-    public UserService(@Qualifier("inMemoryUserStorage") UserStorage userStorage) {
-        this.inMemoryUserStorage = (InMemoryUserStorage) userStorage;
+    public UserDaoService(@Qualifier("userDao") UserStorage userStorage) {
+        this.userDbStorage = (UserDbStorage) userStorage;
     }
 
     public void validationUser(User user) {
@@ -41,68 +41,66 @@ public class UserService {
     }
 
     public void validationIdUser(User user) {
-        if (!inMemoryUserStorage.getListUsers().containsKey(user.getId())) {
+        if (!userDbStorage.getListUsers().containsKey(user.getId())) {
             log.info("Нет такого идентификатора");
             throw new NotFoundException(String.format("Нет такого идентификатора № %s", user.getId()));
         }
     }
 
     public void validationIdUser(Long id) {
-        if (!inMemoryUserStorage.getListUsers().containsKey(id.intValue())) {
+        if (!userDbStorage.getListUsers().containsKey(id.intValue())) {
             log.info("Нет такого идентификатора");
             throw new NotFoundException(String.format("Нет такого идентификатора № %s", id));
         }
     }
 
     public User getUser(Long id) {  //получение данных о пользователе по иго уникальному идентификатору
-        return inMemoryUserStorage.getListUsers().get(id.intValue());
+        return userDbStorage.getListUsers().get(id.intValue());
     }
 
     public void addFriend(Long id, Long friendId) {  //добавление в друзья
-        inMemoryUserStorage.getListUsers().get(id.intValue()).getFriends().add(friendId);
-        inMemoryUserStorage.getListUsers().get(friendId.intValue()).getFriends().add(id);
+        userDbStorage.addFriend(id, friendId);
     }
 
     public void deleteFriend(Long id, Long friendId) {  //удаление из друзей
-        inMemoryUserStorage.getListUsers().get(id.intValue()).getFriends().remove(friendId);
-        inMemoryUserStorage.getListUsers().get(friendId.intValue()).getFriends().remove(id);
+        userDbStorage.deleteFriend(id, friendId);
     }
 
     public List<User> getAllFriendsCurrentUser(Long id) { //возвращаем список пользователей, являющихся его друзьями
-        List<Long> listFriendId = new ArrayList<>(inMemoryUserStorage.getListUsers().get(id.intValue()).getFriends());
+        List<Long> listFriendId = new ArrayList<>(userDbStorage.getListUsers().get(id.intValue()).getFriends());
         List<User> allFriends = new ArrayList<>();
         for (Long friendId : listFriendId) {
-            allFriends.add(inMemoryUserStorage.getListUsers().get(friendId.intValue()));
+            allFriends.add(userDbStorage.getListUsers().get(friendId.intValue()));
         }
         return allFriends;
     }
 
     public List<User> getCommonFriendsList(Long id, Long otherId) {  //список друзей, общих с другим пользователем
-        Set<Long> setId = new HashSet<>(inMemoryUserStorage.getListUsers().get(id.intValue()).getFriends());
-        Set<Long> setFriendId = inMemoryUserStorage.getListUsers().get(otherId.intValue()).getFriends();
+        Set<Long> setId = new HashSet<>(userDbStorage.getListUsers().get(id.intValue()).getFriends());
+        Set<Long> setFriendId = userDbStorage.getListUsers().get(otherId.intValue()).getFriends();
         setId.retainAll(setFriendId);
 
         List<User> commonFriends = new ArrayList<>();
 
         for (Long friendId : setId) {
-            commonFriends.add(inMemoryUserStorage.getListUsers().get(friendId.intValue()));
+            commonFriends.add(userDbStorage.getListUsers().get(friendId.intValue()));
         }
         return commonFriends;
     }
 
     public User addUser(User user) {
-        return inMemoryUserStorage.add(user);
+        return userDbStorage.add(user);
     }
 
     public User deleteUser(User user) {
-        return inMemoryUserStorage.delete(user);
+        return userDbStorage.delete(user);
     }
 
     public User updateUser(User user) {
-        return inMemoryUserStorage.update(user);
+        return userDbStorage.update(user);
     }
 
     public Collection<User> getAllUser() {
-        return inMemoryUserStorage.getListUsers().values();
+        return userDbStorage.getListUsers().values();
     }
 }
