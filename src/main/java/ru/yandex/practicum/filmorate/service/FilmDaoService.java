@@ -13,6 +13,7 @@ import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -66,11 +67,11 @@ public class FilmDaoService {
     }
 
     public void addLike(Long id, Long userId) {  //пользователь ставит лайк фильму
-        filmDbStorage.getListFilms().get(id.intValue()).getUserIdsWhoLiked().add(userId);
+        filmDbStorage.addLike(id, userId);
     }
 
     public void deleteLike(Long id, Long userId) {  //пользователь удаляет лайк
-        filmDbStorage.getListFilms().get(id.intValue()).getUserIdsWhoLiked().remove(userId);
+        filmDbStorage.deleteLike(id, userId);
     }
 
     public List<Film> getFilms(int count) {  //возвращает список из первых count фильмов по количеству лайков.
@@ -97,5 +98,12 @@ public class FilmDaoService {
 
     public Collection<Film> getAllFilm() {
         return filmDbStorage.getListFilms().values();
+    }
+
+    public LinkedHashMap<String, Object> getMpa(Long id){
+        return filmDbStorage.getMpa(id);
+    }
+    public List<LinkedHashMap<String, Object>> getAllMpa(){
+        return filmDbStorage.getAllMpa();
     }
 }

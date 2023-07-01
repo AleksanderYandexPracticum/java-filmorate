@@ -9,11 +9,12 @@ import ru.yandex.practicum.filmorate.service.FilmDaoService;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 @Slf4j
 @RestController()
-@RequestMapping("/films")
+@RequestMapping()
 public class FilmController {
 
     private final FilmDaoService filmDaoService;
@@ -27,7 +28,7 @@ public class FilmController {
         return filmDaoService;
     }
 
-    @PostMapping
+    @PostMapping("/films")
     public Film addFilm(HttpServletRequest request, @RequestBody Film film) {
         log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
@@ -36,7 +37,7 @@ public class FilmController {
         return returnFilm;
     }
 
-    @DeleteMapping
+    @DeleteMapping("/films")
     public Film deleteFilm(HttpServletRequest request, @RequestBody Film film) {
         log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
@@ -46,7 +47,7 @@ public class FilmController {
         return returnFilm;
     }
 
-    @PutMapping
+    @PutMapping("/films")
     public Film updateFilm(HttpServletRequest request, @RequestBody Film film) {
         log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
@@ -56,14 +57,14 @@ public class FilmController {
         return returnFilm;
     }
 
-    @GetMapping
+    @GetMapping("/films")
     public List<Film> getAllFilm(HttpServletRequest request) {
         log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
         return new ArrayList<>(filmDaoService.getAllFilm());
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/films/{id}")
     public Film getFilmById(HttpServletRequest request, @PathVariable("id") Long id) {
         log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
@@ -71,7 +72,7 @@ public class FilmController {
         return filmDaoService.getFilm(id);
     }
 
-    @PutMapping("/{id}/like/{userId}")
+    @PutMapping("/films/{id}/like/{userId}")
     public void likeFilm(HttpServletRequest request, @PathVariable("id") Long id, @PathVariable("userId") Long userId) {
         log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
@@ -79,7 +80,7 @@ public class FilmController {
         filmDaoService.addLike(id, userId);
     }
 
-    @DeleteMapping("/{id}/like/{userId}")
+    @DeleteMapping("/films/{id}/like/{userId}")
     public void deleteFilm(HttpServletRequest request, @PathVariable("id") Long id, @PathVariable("userId") Long userId) {
         log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
@@ -88,11 +89,25 @@ public class FilmController {
         filmDaoService.deleteLike(id, userId);
     }
 
-    @GetMapping("/popular")
+    @GetMapping("/films/popular")
     public List<Film> getPopularFilms(HttpServletRequest request,
                                       @RequestParam(defaultValue = "10") int count) {
         log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
         return filmDaoService.getFilms(count);
+    }
+
+    @GetMapping("/mpa/{id}")
+    public LinkedHashMap<String, Object> getMpaById(HttpServletRequest request, @PathVariable("id") Long id) {
+        log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
+                request.getMethod(), request.getRequestURI(), request.getQueryString());
+        return filmDaoService.getMpa(id);
+    }
+
+    @GetMapping("/mpa")
+    public List<LinkedHashMap<String, Object>> getMpaById(HttpServletRequest request) {
+        log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
+                request.getMethod(), request.getRequestURI(), request.getQueryString());
+        return filmDaoService.getAllMpa();
     }
 }
