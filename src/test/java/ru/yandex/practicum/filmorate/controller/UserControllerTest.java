@@ -1,15 +1,15 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import org.junit.jupiter.api.Test;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.service.UserService;
-import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
-import ru.yandex.practicum.filmorate.model.User;
-
-import java.time.LocalDate;
-
-import static org.junit.jupiter.api.Assertions.*;
+//import org.junit.jupiter.api.Test;
+//import ru.yandex.practicum.filmorate.exception.NotFoundException;
+//import ru.yandex.practicum.filmorate.service.UserService;
+//import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
+//import ru.yandex.practicum.filmorate.exception.ValidationException;
+//import ru.yandex.practicum.filmorate.model.User;
+//
+//import java.time.LocalDate;
+//
+//import static org.junit.jupiter.api.Assertions.*;
 
 class UserControllerTest {
 
