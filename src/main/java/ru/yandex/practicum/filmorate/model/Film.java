@@ -13,11 +13,12 @@ public class Film {
     private LocalDate releaseDate;
     private Long duration;
     private LinkedHashSet<Long> userIdsWhoLiked;  // Храним id тех кто лайкнул
-    private LinkedHashSet<HashMap<String, Object>> genres; // Храним жанры
+    private LinkedHashSet<LinkedHashMap<String, Object>> genres; // Храним жанры
     private LinkedHashMap<String, Object> mpa;  // Храним рейтинг
 
     public Film(Integer id, String name, String description, LocalDate releaseDate, Long duration,
-                LinkedHashSet<Long> userIdsWhoLiked, LinkedHashSet<HashMap<String, Object>> genres, LinkedHashMap<String, Object> mpa) {
+                LinkedHashSet<Long> userIdsWhoLiked, LinkedHashSet<LinkedHashMap<String, Object>> genres,
+                LinkedHashMap<String, Object> mpa) {
         this.id = id;
         this.name = name;
         this.description = description;

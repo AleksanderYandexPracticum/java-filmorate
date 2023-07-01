@@ -109,7 +109,6 @@ public class UserController {
                                            @PathVariable("otherId") Long otherId) {
         log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
-
         return userDaoService.getCommonFriendsList(id, otherId);
     }
 }

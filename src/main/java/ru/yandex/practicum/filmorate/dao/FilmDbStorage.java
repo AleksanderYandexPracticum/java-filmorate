@@ -43,16 +43,15 @@ public class FilmDbStorage implements FilmStorage {
         Long duration = rs.getLong("duration");
 
         LinkedHashSet<Long> userIdsWhoLiked = new LinkedHashSet<>();
-        LinkedHashSet<HashMap<String, Object>> genres = new LinkedHashSet<>();
+        LinkedHashSet<LinkedHashMap<String, Object>> genres = new LinkedHashSet<>();
         LinkedHashMap<String, Object> mpa = new LinkedHashMap<>();
-//
 
-        Integer mpaId = rs.getInt("MPA_ID"); // устанавливаем рейтинг
+        Integer mpaId = rs.getInt("mpa_id"); // устанавливаем рейтинг
         mpa.put("id", mpaId);
         String sqlQuery = "SELECT m.NAME FROM FILMS f JOIN MPA m ON m.MPA_ID=f.MPA_ID WHERE f.FILM_ID =?";
         SqlRowSet filmRows = jdbcTemplate.queryForRowSet(sqlQuery, id);
         if (filmRows.next()) {
-            String nameMpa = filmRows.getString("NAME");
+            String nameMpa = filmRows.getString("name");
             mpa.put("name", nameMpa);
         }
 
@@ -61,23 +60,20 @@ public class FilmDbStorage implements FilmStorage {
                 "WHERE f.FILM_ID =?";
         filmRows = jdbcTemplate.queryForRowSet(sqlQuery, id);
         while (filmRows.next()) {
-            Long userId = filmRows.getLong("USER_ID");
+            Long userId = filmRows.getLong("user_id");
             userIdsWhoLiked.add(userId);
         }
 
-        sqlQuery = "SELECT fg.GENRE_ID FROM FILM_GENRE fg " +       // устанавливаем жанры
+        sqlQuery = "SELECT g.GENRE_ID, g.NAME FROM FILM_GENRE fg " +       // устанавливаем жанры
                 "JOIN GENRE g ON fg.GENRE_ID=g.GENRE_ID " +
                 "WHERE fg.FILM_ID =?";
         filmRows = jdbcTemplate.queryForRowSet(sqlQuery, id);
 
-
         while (filmRows.next()) {
-            Integer genreId = filmRows.getInt("GENRE_ID");
-            HashMap<String, Object> map = new HashMap<>();
+            Integer genreId = filmRows.getInt("genre_id");
+            LinkedHashMap<String, Object> map = new LinkedHashMap<>();
             map.put("id", genreId);
-            genres.add(map);
-            String nameGenre = filmRows.getString("NAME");
-            map = new HashMap<>();
+            String nameGenre = filmRows.getString("name");
             map.put("name", nameGenre);
             genres.add(map);
         }
@@ -88,19 +84,22 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public Film add(Film film) {
         SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
-                .withTableName("FILMS")
-                .usingGeneratedKeyColumns("FILM_ID");
+                .withTableName("films")
+                .usingGeneratedKeyColumns("film_id");
         int id = simpleJdbcInsert.executeAndReturnKey(film.toMap()).intValue();
         String sqlQuery = "UPDATE FILMS SET MPA_ID=? WHERE FILM_ID=?";
-        ArrayList<Object> listIdMpa = new ArrayList<>(film.getMpa().values());
-        jdbcTemplate.update(sqlQuery, listIdMpa.get(0), id);
-        if (film.getGenres() == null) {   // Установка 0 если жанра нет
-            LinkedHashSet<HashMap<String, Object>> genres = new LinkedHashSet<>();
-             film.setGenres(genres);
+
+        if (film.getMpa().values() != null && film.getMpa().values().size() != 0) {
+            ArrayList<Object> listIdMpa = new ArrayList<>(film.getMpa().values());
+            jdbcTemplate.update(sqlQuery, listIdMpa.get(0), id);
         }
-        if (film.getUserIdsWhoLiked() == null) {   // Установка 0 если жанра нет
-            LinkedHashSet<Long> userIdsWhoLiked = new LinkedHashSet<>();
-            film.setUserIdsWhoLiked(userIdsWhoLiked);
+        sqlQuery = "INSERT INTO FILM_GENRE (FILM_ID, GENRE_ID) VALUES (?,?)";
+
+        if (film.getGenres() != null && film.getGenres().size() != 0) {
+            for (LinkedHashMap<String, Object> genre : film.getGenres()) {
+                ArrayList<Object> listGenre = new ArrayList<>(genre.values());
+                jdbcTemplate.update(sqlQuery, id, listGenre.get(0));
+            }
         }
         film.setId(id);
         return film;
@@ -111,15 +110,8 @@ public class FilmDbStorage implements FilmStorage {
         int id = film.getId();
         String sqlQuery = "DELETE FROM FILMS WHERE FILM_ID = ?";
         jdbcTemplate.update(sqlQuery, id);
-//        deleteGenre(film.getGenres());    //УДАЛЯЮ ЗАПИСЬ ИЗ ТАБЛИЦЫ GENRE
         return film;
     }
-//    private void deleteGenre(Set <Integer> genreId) {
-//        for (Integer id : genreId) {
-//            String sqlQuery = "DELETE FROM GENRE g WHERE GENRE_ID=?";
-//            jdbcTemplate.update(sqlQuery, id);
-//        }
-//    }
 
     @Override
     public Film update(Film film) {
@@ -129,10 +121,10 @@ public class FilmDbStorage implements FilmStorage {
         sqlQuery = "DELETE FROM USERWHOLIKED WHERE FILM_ID=?";// Удаляю старые записи о тех кто лайкнул
         jdbcTemplate.update(sqlQuery, id);
 
-        LinkedHashSet<HashMap<String, Object>> genres = film.getGenres(); // Заполняю таблицу FILM_GENRE записями о жанрах
+        LinkedHashSet<LinkedHashMap<String, Object>> genres = film.getGenres(); // Заполняю таблицу FILM_GENRE записями о жанрах
         if (genres != null && genres.size() > 0) {
-            for (HashMap <String, Object> genreId : genres) {
-                sqlQuery = "INSERT FILM_GENRE (FILM_ID, GENRE_ID) VALUES  (?,?)";
+            for (HashMap<String, Object> genreId : genres) {
+                sqlQuery = "INSERT INTO FILM_GENRE (FILM_ID, GENRE_ID) VALUES  (?,?)";
 
                 jdbcTemplate.update(sqlQuery, id, genreId.get("id"));
             }
@@ -141,7 +133,7 @@ public class FilmDbStorage implements FilmStorage {
         Set<Long> userIdsWhoLiked = film.getUserIdsWhoLiked(); // Заполняю таблицу USERWHOLIKED записями о лайках
         if (userIdsWhoLiked != null) {
             for (Long userId : userIdsWhoLiked) {
-                sqlQuery = "INSERT USERWHOLIKED (FILM_ID, USER_ID) VALUES  (?,?)";
+                sqlQuery = "INSERT INTO USERWHOLIKED (FILM_ID, USER_ID) VALUES  (?,?)";
                 jdbcTemplate.update(sqlQuery, id, userId);
             }
         }
@@ -177,46 +169,68 @@ public class FilmDbStorage implements FilmStorage {
         jdbcTemplate.update(sqlQuery, id, userId);
     }
 
-//    private Boolean checkLike(Long id, Long userId) { // Проверка наличия лайка
-//        String sqlQuery = "SELECT f.FILM_ID FROM FILM f JOIN USERWHOLIKED u ON f.FILM_ID=u.FILM_ID " +
-//                "WHERE FILM_ID= ?, USER_ID= ?";            // проверяю наличие лайка пользователя на фильм
-//        SqlRowSet userRows = jdbcTemplate.queryForRowSet(sqlQuery, id, userId);
-//        if (userRows.next()) {
-//            return true;
-//        }
-//        return false;
-//    }
-
-    public LinkedHashMap<String, Object> getMpa(Long id){  // Возвращаю название MPA по id
+    public LinkedHashMap<String, Object> getMpa(Integer id) {  // Возвращаю название MPA по id
         String sqlQuery = "SELECT MPA_ID FROM MPA WHERE MPA_ID =?";
-        SqlRowSet filmRows=jdbcTemplate.queryForRowSet(sqlQuery, id);
-        if(!filmRows.next()){
+        SqlRowSet filmRows = jdbcTemplate.queryForRowSet(sqlQuery, id);
+        if (!filmRows.next()) {
             throw new NotFoundException(String.format("Нет такого идентификатора № %s", id));
         }
 
-        LinkedHashMap<String, Object> mpa= new LinkedHashMap<>();
+        LinkedHashMap<String, Object> mpa = new LinkedHashMap<>();
         sqlQuery = "SELECT NAME FROM MPA WHERE MPA_ID =?";
         filmRows = jdbcTemplate.queryForRowSet(sqlQuery, id);
         if (filmRows.next()) {
-            String nameMpa = filmRows.getString("NAME");
+            String nameMpa = filmRows.getString("name");
             mpa.put("id", id);
             mpa.put("name", nameMpa);
         }
         return mpa;
     }
 
-    public List<LinkedHashMap<String, Object>> getAllMpa(){  // Возвращаю все название MPA
-        List<LinkedHashMap<String, Object>> allMpa= new LinkedList<>();
-        String sqlQuery = "SELECT MPA_ID, NAME FROM MPA";
+    public List<LinkedHashMap<String, Object>> getAllMpa() {  // Возвращаю все название MPA
+        List<LinkedHashMap<String, Object>> allMpa = new LinkedList<>();
+        String sqlQuery = "SELECT * FROM MPA";
         SqlRowSet filmRows = jdbcTemplate.queryForRowSet(sqlQuery);
         while (filmRows.next()) {
-            LinkedHashMap<String, Object> mpa= new LinkedHashMap<>();
-            Integer id = filmRows.getInt("MPA_ID");
-            String nameMpa = filmRows.getString("NAME");
+            LinkedHashMap<String, Object> mpa = new LinkedHashMap<>();
+            Integer id = filmRows.getInt("mpa_id");
+            String nameMpa = filmRows.getString("name");
             mpa.put("id", id);
             mpa.put("name", nameMpa);
             allMpa.add(mpa);
         }
         return allMpa;
+    }
+
+    public LinkedHashMap<String, Object> getGenresById(Integer id) {  // Возвращаю название жанра по id
+        String sqlQuery = "SELECT GENRE_ID, NAME FROM GENRE WHERE GENRE_ID =?";
+        SqlRowSet filmRows = jdbcTemplate.queryForRowSet(sqlQuery, id);
+        if (!filmRows.next()) {
+            throw new NotFoundException(String.format("Нет такого идентификатора № %s", id));
+        }
+        sqlQuery = "SELECT GENRE_ID, NAME FROM GENRE WHERE GENRE_ID =?";
+        filmRows = jdbcTemplate.queryForRowSet(sqlQuery, id);
+        LinkedHashMap<String, Object> genre = new LinkedHashMap<>();
+        if (filmRows.next()) {
+            String nameGenre = filmRows.getString("name");
+            genre.put("id", id);
+            genre.put("name", nameGenre);
+        }
+        return genre;
+    }
+
+    public LinkedHashSet<LinkedHashMap<String, Object>> getAllGenres() {  // Возвращаю все жанры
+        LinkedHashSet<LinkedHashMap<String, Object>> genres = new LinkedHashSet<>();
+        String sqlQuery = "SELECT * FROM GENRE";
+        SqlRowSet filmRows = jdbcTemplate.queryForRowSet(sqlQuery);
+        while (filmRows.next()) {
+            LinkedHashMap<String, Object> genre = new LinkedHashMap<>();
+            Integer idGenre = filmRows.getInt("genre_id");
+            String nameGenre = filmRows.getString("name");
+            genre.put("id", idGenre);
+            genre.put("name", nameGenre);
+            genres.add(genre);
+        }
+        return genres;
     }
 }

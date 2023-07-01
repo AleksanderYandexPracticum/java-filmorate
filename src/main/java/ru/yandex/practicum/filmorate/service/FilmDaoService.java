@@ -11,10 +11,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -100,10 +97,19 @@ public class FilmDaoService {
         return filmDbStorage.getListFilms().values();
     }
 
-    public LinkedHashMap<String, Object> getMpa(Long id){
+    public LinkedHashMap<String, Object> getMpa(Integer id) { // Получение mpa по id
         return filmDbStorage.getMpa(id);
     }
-    public List<LinkedHashMap<String, Object>> getAllMpa(){
+
+    public List<LinkedHashMap<String, Object>> getAllMpa() { // Получение всех mpa
         return filmDbStorage.getAllMpa();
+    }
+
+    public LinkedHashMap<String, Object> getGenresById(Integer id) { // Получение genre по id
+        return filmDbStorage.getGenresById(id);
+    }
+
+    public LinkedHashSet<LinkedHashMap<String, Object>> getAllGenres() { // Получение всех genre
+        return filmDbStorage.getAllGenres();
     }
 }

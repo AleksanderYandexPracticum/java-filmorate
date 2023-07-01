@@ -8,9 +8,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmDaoService;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
+import java.util.*;
 
 @Slf4j
 @RestController()
@@ -98,16 +96,31 @@ public class FilmController {
     }
 
     @GetMapping("/mpa/{id}")
-    public LinkedHashMap<String, Object> getMpaById(HttpServletRequest request, @PathVariable("id") Long id) {
+    public LinkedHashMap<String, Object> getMpaById(HttpServletRequest request, @PathVariable("id") Integer id) {
         log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
         return filmDaoService.getMpa(id);
     }
 
     @GetMapping("/mpa")
-    public List<LinkedHashMap<String, Object>> getMpaById(HttpServletRequest request) {
+    public List<LinkedHashMap<String, Object>> getAllMpa(HttpServletRequest request) {
         log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
         return filmDaoService.getAllMpa();
     }
+
+    @GetMapping("/genres/{id}")
+    public LinkedHashMap<String, Object> getGenresById(HttpServletRequest request, @PathVariable("id") Integer id) {
+        log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
+                request.getMethod(), request.getRequestURI(), request.getQueryString());
+        return filmDaoService.getGenresById(id);
+    }
+
+    @GetMapping("/genres")
+    public LinkedHashSet<LinkedHashMap<String, Object>> getAllGenres(HttpServletRequest request) {
+        log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
+                request.getMethod(), request.getRequestURI(), request.getQueryString());
+        return filmDaoService.getAllGenres();
+    }
+
 }

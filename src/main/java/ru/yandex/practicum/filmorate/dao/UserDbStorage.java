@@ -36,12 +36,12 @@ public class UserDbStorage implements UserStorage {
     }
 
     private User makeUser(ResultSet rs) throws SQLException {
-        Integer id = rs.getInt("user_id");
-        String email = rs.getString("email");
-        String login = rs.getString("login");
-        String name = rs.getString("name");
+        Integer id = rs.getInt("USER_ID");
+        String email = rs.getString("EMAIL");
+        String login = rs.getString("LOGIN");
+        String name = rs.getString("NAME");
         // Получаем дату и конвертируем её из sql.Date в time.LocalDate
-        LocalDate birthday = rs.getDate("birthday").toLocalDate();
+        LocalDate birthday = rs.getDate("BIRTHDAY").toLocalDate();
 
         String sqlFriends = "SELECT fs.FRIEND_ID, fs.CONFIRMATION FROM FRIENDS f " +
                 "JOIN FRIENDSHIPS fs ON f.FRIENDSHIPS_ID = fs.FRIENDSHIPS_ID WHERE f.USER_ID =?";
@@ -51,9 +51,9 @@ public class UserDbStorage implements UserStorage {
 
         SqlRowSet userRows = jdbcTemplate.queryForRowSet(sqlFriends, id);
         while (userRows.next()) {
-            Long friend = userRows.getLong("friend_id");
+            Long friend = userRows.getLong("FRIEND_ID");
             friends.add(friend);
-            friendships.put(friend, userRows.getInt("confirmation"));
+            friendships.put(friend, userRows.getInt("CONFIRMATION"));
         }
         return new User(id, email, login, name, birthday, friends, friendships);
     }
@@ -70,8 +70,8 @@ public class UserDbStorage implements UserStorage {
     @Override
     public User add(User user) {
         SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
-                .withTableName("users")
-                .usingGeneratedKeyColumns("user_id");
+                .withTableName("USERS")
+                .usingGeneratedKeyColumns("USER_ID");
         int id = simpleJdbcInsert.executeAndReturnKey(user.toMap()).intValue();
         user.setId(id);
         return user;
@@ -98,7 +98,7 @@ public class UserDbStorage implements UserStorage {
             Set<Integer> Oldfriends = new HashSet<>();
             SqlRowSet userRows = jdbcTemplate.queryForRowSet(sqlQueryOldFriends, id);
             if (userRows.next()) {
-                Oldfriends.add(userRows.getInt("friend_id"));
+                Oldfriends.add(userRows.getInt("FRIEND_ID"));
             }
             for (Integer oldfriend : Oldfriends) {
                 if (!user.getFriendships().keySet().contains(oldfriend)) {
@@ -133,7 +133,7 @@ public class UserDbStorage implements UserStorage {
         String sqlQuery = "SELECT FRIEND_ID FROM FRIENDSHIPS fs " +
                 "WHERE FRIENDSHIPS_ID IN (SELECT f.FRIENDSHIPS_ID FROM FRIENDS f WHERE f.USER_ID = ?) " +
                 "AND fs.FRIEND_ID=?"; // получаю спискок друзей друга
-        SqlRowSet userRows = jdbcTemplate.queryForRowSet(sqlQuery, id.intValue(),friendId.intValue());
+        SqlRowSet userRows = jdbcTemplate.queryForRowSet(sqlQuery, id.intValue(), friendId.intValue());
         if (userRows.next()) {
             return;
         }
