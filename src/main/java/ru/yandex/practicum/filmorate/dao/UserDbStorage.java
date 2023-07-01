@@ -95,12 +95,12 @@ public class UserDbStorage implements UserStorage {
         } else {
             String sqlQueryOldFriends = "SELECT FRIEND_ID FROM FRIENDSHIPS WHERE FRIENDSHIPS_ID IN (" +
                     "SELECT f.FRIENDSHIPS_ID FROM FRIENDS f WHERE f.USER_ID = ?)";
-            Set<Integer> Oldfriends = new HashSet<>();
+            Set<Integer> oldfriends = new HashSet<>();
             SqlRowSet userRows = jdbcTemplate.queryForRowSet(sqlQueryOldFriends, id);
             if (userRows.next()) {
-                Oldfriends.add(userRows.getInt("FRIEND_ID"));
+                oldfriends.add(userRows.getInt("FRIEND_ID"));
             }
-            for (Integer oldfriend : Oldfriends) {
+            for (Integer oldfriend : oldfriends) {
                 if (!user.getFriendships().keySet().contains(oldfriend)) {
                     deleteFriends(oldfriend);
                 }
