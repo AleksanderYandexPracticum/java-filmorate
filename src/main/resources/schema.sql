@@ -1,11 +1,11 @@
-DROP TABLE friends;
-DROP TABLE userWhoLiked;
-DROP TABLE friendships;
-DROP TABLE users;
-DROP TABLE film_genre;
-DROP TABLE films;
-DROP TABLE genre;
-DROP TABLE mpa;
+DROP TABLE IF EXISTS friends;
+DROP TABLE IF EXISTS userWhoLiked;
+DROP TABLE IF EXISTS friendships;
+DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS film_genre;
+DROP TABLE IF EXISTS films;
+DROP TABLE IF EXISTS genre;
+DROP TABLE IF EXISTS mpa;
 
 
 Create table IF NOT EXISTS mpa
