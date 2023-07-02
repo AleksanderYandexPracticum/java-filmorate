@@ -1,110 +1,172 @@
 package ru.yandex.practicum.filmorate.controller;
 
-//import org.junit.jupiter.api.Test;
-//import ru.yandex.practicum.filmorate.exception.NotFoundException;
-//import ru.yandex.practicum.filmorate.service.UserService;
-//import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
-//import ru.yandex.practicum.filmorate.exception.ValidationException;
-//import ru.yandex.practicum.filmorate.model.User;
-//
-//import java.time.LocalDate;
-//
-//import static org.junit.jupiter.api.Assertions.*;
+//import org.junit.jupiter.api.BeforeEach;
 
+import org.junit.jupiter.api.Test;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.context.SpringBootTest;
+import ru.yandex.practicum.filmorate.dao.UserDbStorage;
+import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserDaoService;
+
+import java.time.LocalDate;
+import java.util.*;
+
+@SpringBootTest
+@AutoConfigureTestDatabase
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 class UserControllerTest {
+    private final UserDaoService userDaoService;
+    private final UserDbStorage userDbStorage;
 
-//    InMemoryUserStorage inMemoryUserStorage = new InMemoryUserStorage();
-//    UserService userService = new UserService(inMemoryUserStorage);
-//    UserController userController = new UserController(userService);
-//
-//    @Test
-//    void addUser() {
-//        User user = new User();
-//        user.setLogin("dolore");
-//        user.setName("Nick Name");
-//        user.setEmail("");
-//        user.setBirthday(LocalDate.of(1946, 8, 20));
-//        final ValidationException exception = assertThrows(ValidationException.class,
-//                () -> userController.getUserDaoService().validationUser(user));
-//        assertEquals("Электронная почта не может быть пустой и должна содержать символ @", exception.getMessage());
-//
-//        User user1 = new User();
-//        user1.setLogin(" ");
-//        user1.setName("Nick Name");
-//        user1.setEmail("mail@mail.ru");
-//        user1.setBirthday(LocalDate.of(1946, 8, 20));
-//        final ValidationException exception1 = assertThrows(ValidationException.class,
-//                () -> userController.getUserDaoService().validationUser(user1));
-//        assertEquals("Логин не может быть пустым и содержать пробелы", exception1.getMessage());
-//
-//        User user2 = new User();
-//        user2.setLogin("dolore");
-//        user2.setName("");
-//        user2.setEmail("mail@mail.ru");
-//        user2.setBirthday(LocalDate.of(1946, 8, 20));
-//
-//        userController.getUserDaoService().validationUser(user2);
-//
-//        assertEquals(user2.getName(), user2.getLogin());
-//
-//        User user3 = new User();
-//        user3.setLogin("dolore");
-//        user3.setName("Nick Name");
-//        user3.setEmail("mail@mail.ru");
-//        user3.setBirthday(LocalDate.of(2030, 8, 20));
-//        final ValidationException exception3 = assertThrows(ValidationException.class,
-//                () -> userController.getUserDaoService().validationUser(user3));
-//        assertEquals("Дата рождения не может быть в будущем", exception3.getMessage());
+//    @BeforeEach
+//    private void createUserinDb() {
+//        Set<Long> friends = new HashSet<>();
+//        Map<Long, Integer> friendships = new HashMap<>();
+//        LocalDate date = LocalDate.parse("1946-08-20");
+//        User user = new User(1, "mail@mail.ru", "dolore", "Nick Name", date, friends, friendships);
+//        userDbStorage.add(user);
 //    }
-//
-//    @Test
-//    void updateUser() {
-//        User user = new User();
-//        user.setLogin("dolore");
-//        user.setName("Nick Name");
-//        user.setEmail("");
-//        user.setBirthday(LocalDate.of(1946, 8, 20));
-//        final ValidationException exception = assertThrows(ValidationException.class,
-//                () -> userController.getUserDaoService().validationUser(user));
-//        assertEquals("Электронная почта не может быть пустой и должна содержать символ @", exception.getMessage());
-//
-//        User user1 = new User();
-//        user1.setLogin(" ");
-//        user1.setName("Nick Name");
-//        user1.setEmail("mail@mail.ru");
-//        user1.setBirthday(LocalDate.of(1946, 8, 20));
-//        final ValidationException exception1 = assertThrows(ValidationException.class,
-//                () -> userController.getUserDaoService().validationUser(user1));
-//        assertEquals("Логин не может быть пустым и содержать пробелы", exception1.getMessage());
-//
-//        User user2 = new User();
-//        user2.setLogin("dolore");
-//        user2.setName("");
-//        user2.setEmail("mail@mail.ru");
-//        user2.setBirthday(LocalDate.of(1946, 8, 20));
-//
-//        userController.getUserDaoService().validationUser(user2);
-//
-//        assertEquals(user2.getName(), user2.getLogin());
-//
-//        User user3 = new User();
-//        user3.setLogin("dolore");
-//        user3.setName("Nick Name");
-//        user3.setEmail("mail@mail.ru");
-//        user3.setBirthday(LocalDate.of(2030, 8, 20));
-//        final ValidationException exception3 = assertThrows(ValidationException.class,
-//                () -> userController.getUserDaoService().validationUser(user3));
-//        assertEquals("Дата рождения не может быть в будущем", exception3.getMessage());
-//
-//        User user4 = new User();
-//        user4.setId(4);
-//        user4.setLogin("dolore");
-//        user4.setName("Nick Name");
-//        user4.setEmail("mail@mail.ru");
-//        user4.setBirthday(LocalDate.of(2030, 8, 20));
-//        final NotFoundException exception4 = assertThrows(NotFoundException.class,
-//                () -> userController.getUserDaoService().validationIdUser(user4));
-//        exception4.getMessage();
-//        assertEquals("Нет такого идентификатора № 4", exception4.getMessage());
-//    }
+
+    @Test
+    public void testFindUserById() {
+        Set<Long> friends = new HashSet<>();
+        Map<Long, Integer> friendships = new HashMap<>();
+        LocalDate date = LocalDate.parse("1946-08-20");
+        User user = new User(1, "mail@mail.ru", "dolore", "Nick Name", date, friends, friendships);
+        userDbStorage.add(user);
+
+        User userFromBd = userDbStorage.getListUsers().get(1);
+        assertEquals(1, userFromBd.getId());
+        userFromBd.setId(2);
+        final NotFoundException exception = assertThrows(NotFoundException.class,
+                () -> userDaoService.validationIdUser(userFromBd));
+        exception.getMessage();
+        assertEquals("Нет такого идентификатора № 2", exception.getMessage());
+    }
+
+    @Test
+    public void delete() {
+        Set<Long> friends = new HashSet<>();
+        Map<Long, Integer> friendships = new HashMap<>();
+        LocalDate date = LocalDate.parse("1946-08-20");
+        User user = new User(1, "mail@mail.ru", "dolore", "Nick Name", date, friends, friendships);
+        userDbStorage.add(user);
+
+        User deleteUser = userDbStorage.delete(user);
+        assertEquals(1, deleteUser.getId());
+    }
+
+    @Test
+    public void update() {
+        Set<Long> friends = new HashSet<>();
+        Map<Long, Integer> friendships = new HashMap<>();
+        LocalDate date = LocalDate.parse("1946-08-20");
+        User user = new User(1, "mail@mail.ru", "dolore", "Nick Name", date, friends, friendships);
+        userDbStorage.add(user);
+
+        LocalDate dateUp = LocalDate.parse("1976-09-20");
+        User userUp = new User(1, "mail@yandex.ru", "doloreUpdate", "est adipisicing", dateUp, friends, friendships);
+
+        User newUser = userDbStorage.update(userUp);
+        assertEquals(1, newUser.getId());
+        assertEquals("mail@yandex.ru", newUser.getEmail());
+        assertEquals("doloreUpdate", newUser.getLogin());
+        assertEquals("est adipisicing", newUser.getName());
+
+    }
+
+    @Test
+    public void getAll() {
+        Set<Long> friends = new HashSet<>();
+        Map<Long, Integer> friendships = new HashMap<>();
+        LocalDate date = LocalDate.parse("1946-08-20");
+        User user = new User(1, "mail@mail.ru", "dolore", "Nick Name", date, friends, friendships);
+        userDbStorage.add(user);
+
+        LocalDate otherDate = LocalDate.parse("1976-08-20");
+        User otherUser = new User(2, "friend@mail.ru", "friend", "friend adipisicing", otherDate,
+                friends, friendships);
+        userDbStorage.add(otherUser);
+
+        Map<Integer, User> allUser = userDbStorage.getListUsers();
+
+        assertEquals(1, allUser.get(1).getId());
+        assertEquals("mail@mail.ru", allUser.get(1).getEmail());
+        assertEquals("dolore", allUser.get(1).getLogin());
+        assertEquals("Nick Name", allUser.get(1).getName());
+        assertTrue(allUser.containsKey(1));
+
+        assertEquals(2, allUser.get(2).getId());
+        assertEquals("friend@mail.ru", allUser.get(2).getEmail());
+        assertEquals("friend", allUser.get(2).getLogin());
+        assertEquals("friend adipisicing", allUser.get(2).getName());
+        assertTrue(allUser.containsKey(2));
+    }
+
+    @Test
+    public void addFriend() {
+        Set<Long> friends = new HashSet<>();
+        Map<Long, Integer> friendships = new HashMap<>();
+        LocalDate date = LocalDate.parse("1946-08-20");
+        User user = new User(1, "mail@mail.ru", "dolore", "Nick Name", date, friends, friendships);
+        userDbStorage.add(user);
+
+
+        LocalDate otherDate = LocalDate.parse("1976-08-20");
+        User otherUser = new User(2, "friend@mail.ru", "friend", "friend adipisicing",
+                otherDate, friends, friendships);
+        userDbStorage.add(otherUser); // добавляю в БД друга
+        userDbStorage.addFriend(1L, 2L);  // добавляю юзеру  друга
+
+        User userWithFriend = userDbStorage.getListUsers().get(1);
+
+        assertTrue(userWithFriend.getFriends().contains(2L));   // проверяю у юзер дружбу и подтверждение "1-подтвержд"
+        assertTrue(userWithFriend.getFriendships().containsKey(2L));
+        assertTrue(userWithFriend.getFriendships().containsValue(0));
+
+        userDbStorage.addFriend(2L, 1L);   // добавляю  другу в друзья юзера
+        User friend = userDbStorage.getListUsers().get(2);
+
+        assertTrue(friend.getFriends().contains(1L));  // проверяю у друга дружбу и подтверждение "1-подтвержд"
+        assertTrue(friend.getFriendships().containsKey(1L));
+        assertTrue(friend.getFriendships().containsValue(1));
+
+        userWithFriend = userDbStorage.getListUsers().get(1);   // читаю из БД обновленное значения подтверждения дружбы
+        assertTrue(userWithFriend.getFriendships().containsValue(1));
+    }
+
+    @Test
+    public void deleteFriend() {
+        Set<Long> friends = new HashSet<>();
+        Map<Long, Integer> friendships = new HashMap<>();
+        LocalDate date = LocalDate.parse("1946-08-20");
+        User user = new User(1, "mail@mail.ru", "dolore", "Nick Name", date, friends, friendships);
+        userDbStorage.add(user);
+
+        LocalDate otherDate = LocalDate.parse("1976-08-20");
+        User otherUser = new User(2, "friend@mail.ru", "friend", "friend adipisicing",
+                otherDate, friends, friendships);
+        userDbStorage.add(otherUser); // добавляю в БД друга
+        userDbStorage.addFriend(1L, 2L);  // добавляю юзеру друга
+
+        userDbStorage.addFriend(2L, 1L);   // добавляю  другу в друзья юзера
+
+        userDbStorage.deleteFriend(1L, 2L);
+
+        User userWithoutFriend = userDbStorage.getListUsers().get(1);
+
+        assertTrue(userWithoutFriend.getFriends().size() == 0);   // проверяю у юзер дружбу
+
+        User friend = userDbStorage.getListUsers().get(2);
+
+        assertTrue(friend.getFriends().size() == 0);   // проверяю у друга дружбу
+
+    }
 }
