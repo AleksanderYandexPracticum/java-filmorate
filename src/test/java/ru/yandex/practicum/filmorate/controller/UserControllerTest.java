@@ -1,8 +1,7 @@
 package ru.yandex.practicum.filmorate.controller;
 
-//import org.junit.jupiter.api.BeforeEach;
-
 import org.junit.jupiter.api.Test;
+import org.springframework.test.annotation.DirtiesContext;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -21,18 +20,10 @@ import java.util.*;
 @SpringBootTest
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class UserControllerTest {
     private final UserDaoService userDaoService;
     private final UserDbStorage userDbStorage;
-
-//    @BeforeEach
-//    private void createUserinDb() {
-//        Set<Long> friends = new HashSet<>();
-//        Map<Long, Integer> friendships = new HashMap<>();
-//        LocalDate date = LocalDate.parse("1946-08-20");
-//        User user = new User(1, "mail@mail.ru", "dolore", "Nick Name", date, friends, friendships);
-//        userDbStorage.add(user);
-//    }
 
     @Test
     public void testFindUserById() {

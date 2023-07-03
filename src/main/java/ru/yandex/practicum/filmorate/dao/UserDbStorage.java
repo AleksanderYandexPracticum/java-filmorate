@@ -129,7 +129,8 @@ public class UserDbStorage implements UserStorage {
         return userMap;
     }
 
-    public void addFriend(Long id, Long friendId) { String sqlQuery = "SELECT FRIEND_ID FROM FRIENDSHIPS fs " +
+    public void addFriend(Long id, Long friendId) {
+        String sqlQuery = "SELECT FRIEND_ID FROM FRIENDSHIPS fs " +
                 "WHERE FRIENDSHIPS_ID IN (SELECT f.FRIENDSHIPS_ID FROM FRIENDS f WHERE f.USER_ID = ?) " +
                 "AND fs.FRIEND_ID=?"; // получаю спискок друзей друга
         SqlRowSet userRows = jdbcTemplate.queryForRowSet(sqlQuery, id.intValue(), friendId.intValue());

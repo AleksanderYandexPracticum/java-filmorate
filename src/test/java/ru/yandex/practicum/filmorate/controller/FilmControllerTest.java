@@ -1,23 +1,14 @@
 package ru.yandex.practicum.filmorate.controller;
 
-//import org.junit.jupiter.api.DisplayName;
-
 import org.junit.jupiter.api.Test;
-//import ru.yandex.practicum.filmorate.exception.NotFoundException;
-//import ru.yandex.practicum.filmorate.exception.ValidationException;
-//import ru.yandex.practicum.filmorate.model.Film;
-//import ru.yandex.practicum.filmorate.service.FilmService;
-//import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
-//
-//import java.time.LocalDate;
-//
+
 import static org.junit.jupiter.api.Assertions.*;
 
 import lombok.RequiredArgsConstructor;
-import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
 import ru.yandex.practicum.filmorate.dao.FilmDbStorage;
 import ru.yandex.practicum.filmorate.dao.UserDbStorage;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
@@ -31,6 +22,7 @@ import java.util.*;
 @SpringBootTest
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class FilmControllerTest {
     private final FilmDbStorage filmDbStorage;
     private final FilmDaoService filmDaoService;
@@ -182,12 +174,126 @@ class FilmControllerTest {
 
     @Test
     public void getMpa() {
-//        public LinkedHashMap<String, Object> getMpa(Integer id)
+        LinkedHashSet<Long> userIdsWhoLiked = new LinkedHashSet<>();  // Храним id тех кто лайкнул
+        LinkedHashSet<LinkedHashMap<String, Object>> genres = new LinkedHashSet<>(); // Храним жанры
+        LinkedHashMap<String, Object> mpa = new LinkedHashMap<>();  // Храним рейтинг
+        mpa.put("id", 3);
+        LocalDate releaseDate = LocalDate.parse("1967-03-25");
+        Film film = new Film(1, "nisi eiusmod", "adipisicing", releaseDate, 100L,
+                userIdsWhoLiked, genres, mpa);
+        filmDbStorage.add(film);
+
+        LinkedHashMap<String, Object> mpaFromBd = filmDbStorage.getMpa(3);
+        assertTrue(mpaFromBd.containsValue(3));
+
+        final NotFoundException exception = assertThrows(NotFoundException.class,
+                () -> filmDbStorage.getMpa(7));
+        exception.getMessage();
+        assertEquals("Нет такого идентификатора № 7", exception.getMessage());
     }
 
     @Test
     public void getAllMpa() {
-//        public List<LinkedHashMap<String, Object>> getAllMpa()
+        LinkedHashSet<Long> userIdsWhoLiked = new LinkedHashSet<>();  // Храним id тех кто лайкнул
+        LinkedHashSet<LinkedHashMap<String, Object>> genres = new LinkedHashSet<>(); // Храним жанры
+        LinkedHashMap<String, Object> mpa = new LinkedHashMap<>();  // Храним рейтинг
+        mpa.put("id", 3);
+        LocalDate releaseDate = LocalDate.parse("1967-03-25");
+        Film film = new Film(1, "nisi eiusmod", "adipisicing", releaseDate, 100L,
+                userIdsWhoLiked, genres, mpa);
+        filmDbStorage.add(film);
+
+        LocalDate releaseDateUp = LocalDate.parse("1999-04-30");
+        mpa = new LinkedHashMap<>();
+        mpa.put("id", 1);
+        genres = new LinkedHashSet<>();
+        LinkedHashMap<String, Object> storageIdAndNameGenre = new LinkedHashMap<>();
+        storageIdAndNameGenre.put("id", 1);
+        genres.add(storageIdAndNameGenre);
+        Film otherFilm = new Film(2, "New film", "New film update decription", releaseDateUp,
+                120L, userIdsWhoLiked, genres, mpa);
+        filmDbStorage.add(otherFilm);
+
+        List<LinkedHashMap<String, Object>> allMpa = filmDbStorage.getAllMpa();
+
+        assertTrue(allMpa.get(2).containsKey("id"));
+        assertTrue(allMpa.get(2).containsValue(3));
+        assertTrue(allMpa.get(2).containsKey("name"));
+        assertTrue(allMpa.get(2).containsValue("PG-13"));
+
+
+        assertTrue(allMpa.get(0).containsKey("id"));
+        assertTrue(allMpa.get(0).containsValue(1));
+        assertTrue(allMpa.get(0).containsKey("name"));
+        assertTrue(allMpa.get(0).containsValue("G"));
     }
 
+    @Test
+    public void getGenresById() {
+        LinkedHashSet<Long> userIdsWhoLiked = new LinkedHashSet<>();  // Храним id тех кто лайкнул
+        LinkedHashSet<LinkedHashMap<String, Object>> genres = new LinkedHashSet<>(); // Храним жанры
+        LinkedHashMap<String, Object> mpa = new LinkedHashMap<>();  // Храним рейтинг
+        mpa.put("id", 3);
+        genres = new LinkedHashSet<>();
+        LinkedHashMap<String, Object> storageIdAndNameGenre = new LinkedHashMap<>();
+        storageIdAndNameGenre.put("id", 1);
+        genres.add(storageIdAndNameGenre);
+
+        LocalDate releaseDate = LocalDate.parse("1967-03-25");
+        Film film = new Film(1, "nisi eiusmod", "adipisicing", releaseDate, 100L,
+                userIdsWhoLiked, genres, mpa);
+        filmDbStorage.add(film);
+
+        LinkedHashMap<String, Object> genreFromBd = filmDbStorage.getGenresById(1);
+        assertTrue(genreFromBd.containsValue(1));
+
+        final NotFoundException exception = assertThrows(NotFoundException.class,
+                () -> filmDbStorage.getGenresById(7));
+        exception.getMessage();
+        assertEquals("Нет такого идентификатора № 7", exception.getMessage());
+    }
+
+    @Test
+    public void getAllGenres() {
+
+        LinkedHashSet<Long> userIdsWhoLiked = new LinkedHashSet<>();  // Храним id тех кто лайкнул
+        LinkedHashSet<LinkedHashMap<String, Object>> genres = new LinkedHashSet<>(); // Храним жанры
+        LinkedHashMap<String, Object> mpa = new LinkedHashMap<>();  // Храним рейтинг
+        mpa.put("id", 3);
+        LinkedHashMap<String, Object> storageIdAndNameGenre = new LinkedHashMap<>();
+        storageIdAndNameGenre.put("id", 1);
+        genres.add(storageIdAndNameGenre);
+        LocalDate releaseDate = LocalDate.parse("1967-03-25");
+        Film film = new Film(1, "nisi eiusmod", "adipisicing", releaseDate, 100L,
+                userIdsWhoLiked, genres, mpa);
+        filmDbStorage.add(film);
+
+        LocalDate releaseDateUp = LocalDate.parse("1999-04-30");
+        mpa = new LinkedHashMap<>();
+        mpa.put("id", 1);
+        genres = new LinkedHashSet<>();
+        storageIdAndNameGenre = new LinkedHashMap<>();
+        storageIdAndNameGenre.put("id", 2);
+        genres.add(storageIdAndNameGenre);
+        Film otherFilm = new Film(2, "New film", "New film update decription", releaseDateUp,
+                120L, userIdsWhoLiked, genres, mpa);
+        filmDbStorage.add(otherFilm);
+
+        LinkedHashSet<LinkedHashMap<String, Object>> allGenres = filmDbStorage.getAllGenres();
+
+        int id = 1;
+        for (LinkedHashMap<String, Object> allGenre : allGenres) {
+            assertTrue(allGenre.containsKey("id"));
+            assertTrue(allGenre.containsValue(id));
+            id++;
+        }
+
+        String name = "Комедия";
+        for (LinkedHashMap<String, Object> allGenre : allGenres) {
+            assertTrue(allGenre.containsKey("name"));
+            assertTrue(allGenre.containsValue(name));
+            if (name.equals("Драма")) break;
+            name = "Драма";
+        }
+    }
 }
