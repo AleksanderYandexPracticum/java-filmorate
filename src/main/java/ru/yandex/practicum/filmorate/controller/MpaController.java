@@ -11,7 +11,6 @@ import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.service.FilmDaoService;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.LinkedHashMap;
 import java.util.List;
 
 @Slf4j
