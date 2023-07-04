@@ -8,6 +8,8 @@ import ru.yandex.practicum.filmorate.dao.FilmDbStorage;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import java.time.LocalDate;
@@ -97,19 +99,19 @@ public class FilmDaoService {
         return filmDbStorage.getListFilms().values();
     }
 
-    public LinkedHashMap<String, Object> getMpa(Integer id) { // Получение mpa по id
+    public Mpa getMpa(Integer id) { // Получение mpa по id
         return filmDbStorage.getMpa(id);
     }
 
-    public List<LinkedHashMap<String, Object>> getAllMpa() { // Получение всех mpa
+    public List<Mpa> getAllMpa() { // Получение всех mpa
         return filmDbStorage.getAllMpa();
     }
 
-    public LinkedHashMap<String, Object> getGenresById(Integer id) { // Получение genre по id
+    public Genre getGenresById(Integer id) { // Получение genre по id
         return filmDbStorage.getGenresById(id);
     }
 
-    public LinkedHashSet<LinkedHashMap<String, Object>> getAllGenres() { // Получение всех genre
+    public LinkedHashSet<Genre> getAllGenres() { // Получение всех genre
         return filmDbStorage.getAllGenres();
     }
 }

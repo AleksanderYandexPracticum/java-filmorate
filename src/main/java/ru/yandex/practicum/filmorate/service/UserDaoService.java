@@ -67,17 +67,16 @@ public class UserDaoService {
     }
 
     public List<User> getAllFriendsCurrentUser(Long id) { //возвращаем список пользователей, являющихся его друзьями
-        List<Long> listFriendId = new ArrayList<>(userDbStorage.getListUsers().get(id.intValue()).getFriends());
         List<User> allFriends = new ArrayList<>();
-        for (Long friendId : listFriendId) {
+        for (Long friendId : userDbStorage.getListUsers().get(id.intValue()).getFriendships().keySet()) {
             allFriends.add(userDbStorage.getListUsers().get(friendId.intValue()));
         }
         return allFriends;
     }
 
     public List<User> getCommonFriendsList(Long id, Long otherId) {  //список друзей, общих с другим пользователем
-        Set<Long> setId = new HashSet<>(userDbStorage.getListUsers().get(id.intValue()).getFriends());
-        Set<Long> setFriendId = userDbStorage.getListUsers().get(otherId.intValue()).getFriends();
+        Set<Long> setId = userDbStorage.getListUsers().get(id.intValue()).getFriendships().keySet();
+        Set<Long> setFriendId = userDbStorage.getListUsers().get(otherId.intValue()).getFriendships().keySet();
         setId.retainAll(setFriendId);
 
         List<User> commonFriends = new ArrayList<>();

@@ -94,33 +94,4 @@ public class FilmController {
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
         return filmDaoService.getFilms(count);
     }
-
-    @GetMapping("/mpa/{id}")
-    public LinkedHashMap<String, Object> getMpaById(HttpServletRequest request, @PathVariable("id") Integer id) {
-        log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
-                request.getMethod(), request.getRequestURI(), request.getQueryString());
-        return filmDaoService.getMpa(id);
-    }
-
-    @GetMapping("/mpa")
-    public List<LinkedHashMap<String, Object>> getAllMpa(HttpServletRequest request) {
-        log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
-                request.getMethod(), request.getRequestURI(), request.getQueryString());
-        return filmDaoService.getAllMpa();
-    }
-
-    @GetMapping("/genres/{id}")
-    public LinkedHashMap<String, Object> getGenresById(HttpServletRequest request, @PathVariable("id") Integer id) {
-        log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
-                request.getMethod(), request.getRequestURI(), request.getQueryString());
-        return filmDaoService.getGenresById(id);
-    }
-
-    @GetMapping("/genres")
-    public LinkedHashSet<LinkedHashMap<String, Object>> getAllGenres(HttpServletRequest request) {
-        log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
-                request.getMethod(), request.getRequestURI(), request.getQueryString());
-        return filmDaoService.getAllGenres();
-    }
-
 }

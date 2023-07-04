@@ -59,17 +59,17 @@ public class UserService {
     }
 
     public void addFriend(Long id, Long friendId) {  //добавление в друзья
-        inMemoryUserStorage.getListUsers().get(id.intValue()).getFriends().add(friendId);
-        inMemoryUserStorage.getListUsers().get(friendId.intValue()).getFriends().add(id);
+        inMemoryUserStorage.getListUsers().get(id.intValue()).getFriendships().put(friendId,true);
+        inMemoryUserStorage.getListUsers().get(friendId.intValue()).getFriendships().put(id, true);
     }
 
     public void deleteFriend(Long id, Long friendId) {  //удаление из друзей
-        inMemoryUserStorage.getListUsers().get(id.intValue()).getFriends().remove(friendId);
-        inMemoryUserStorage.getListUsers().get(friendId.intValue()).getFriends().remove(id);
+        inMemoryUserStorage.getListUsers().get(id.intValue()).getFriendships().remove(friendId);
+        inMemoryUserStorage.getListUsers().get(friendId.intValue()).getFriendships().remove(id);
     }
 
     public List<User> getAllFriendsCurrentUser(Long id) { //возвращаем список пользователей, являющихся его друзьями
-        List<Long> listFriendId = new ArrayList<>(inMemoryUserStorage.getListUsers().get(id.intValue()).getFriends());
+        List<Long> listFriendId = new ArrayList<>(inMemoryUserStorage.getListUsers().get(id.intValue()).getFriendships().keySet());
         List<User> allFriends = new ArrayList<>();
         for (Long friendId : listFriendId) {
             allFriends.add(inMemoryUserStorage.getListUsers().get(friendId.intValue()));
@@ -78,8 +78,8 @@ public class UserService {
     }
 
     public List<User> getCommonFriendsList(Long id, Long otherId) {  //список друзей, общих с другим пользователем
-        Set<Long> setId = new HashSet<>(inMemoryUserStorage.getListUsers().get(id.intValue()).getFriends());
-        Set<Long> setFriendId = inMemoryUserStorage.getListUsers().get(otherId.intValue()).getFriends();
+        Set<Long> setId = new HashSet<>(inMemoryUserStorage.getListUsers().get(id.intValue()).getFriendships().keySet());
+        Set<Long> setFriendId = inMemoryUserStorage.getListUsers().get(otherId.intValue()).getFriendships().keySet();
         setId.retainAll(setFriendId);
 
         List<User> commonFriends = new ArrayList<>();

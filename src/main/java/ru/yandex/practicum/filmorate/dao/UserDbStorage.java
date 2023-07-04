@@ -43,28 +43,29 @@ public class UserDbStorage implements UserStorage {
         // Получаем дату и конвертируем её из sql.Date в time.LocalDate
         LocalDate birthday = rs.getDate("BIRTHDAY").toLocalDate();
 
-        String sqlFriends = "SELECT fs.FRIEND_ID, fs.CONFIRMATION FROM FRIENDS f " +
-                "JOIN FRIENDSHIPS fs ON f.FRIENDSHIPS_ID = fs.FRIENDSHIPS_ID WHERE f.USER_ID =?";
+        String sqlFriends = "SELECT fs.FRIEND_ID, fs.CONFIRMATION FROM FRIENDSHIPS fs WHERE fs.USER_ID =?";
 
-        Set<Long> friends = new HashSet<>();
-        Map<Long, Integer> friendships = new HashMap<>();
+        //Set<Long> friends = new HashSet<>();
+        Map<Long, Boolean> friendships = new HashMap<>();
 
         SqlRowSet userRows = jdbcTemplate.queryForRowSet(sqlFriends, id);
         while (userRows.next()) {
             Long friend = userRows.getLong("FRIEND_ID");
-            friends.add(friend);
-            friendships.put(friend, userRows.getInt("CONFIRMATION"));
+            friendships.put(friend, userRows.getBoolean("CONFIRMATION"));
         }
-        return new User(id, email, login, name, birthday, friends, friendships);
+        return new User(id, email, login, name, birthday, friendships);
     }
 
-    private void deleteFriends(int id) {  // Удаляю друзей из таблиц FRIENDS и FRIENDSHIPS
-        String sqlQueryDeleteInFriendships = "DELETE FROM FRIENDSHIPS WHERE FRIENDSHIPS_ID IN (" +
-                "SELECT f.FRIENDSHIPS_ID FROM FRIENDS f WHERE USER_ID = ?)";
-        jdbcTemplate.update(sqlQueryDeleteInFriendships, id);
-
-        String sqlQueryDeleteInFriends = "DELETE FROM FRIENDS WHERE USER_ID = ?";
-        jdbcTemplate.update(sqlQueryDeleteInFriends, id);
+    private void deleteFriends(int id) {  // Удаляю друзей из таблицы FRIENDSHIPS
+        String sqlQuery = "SELECT FRIEND_ID FROM FRIENDSHIPS WHERE USER_ID = ?";  // Нахожу всех друзей
+        SqlRowSet userRows = jdbcTemplate.queryForRowSet(sqlQuery, id);
+        while (userRows.next()) {                               // Удаляю друзей у котрого конкретный user
+            Integer friendId = userRows.getInt("FRIEND_ID");
+            sqlQuery = "DELETE FROM FRIENDSHIPS WHERE USER_ID = ? AND FRIEND_ID = ?";
+            jdbcTemplate.update(sqlQuery, friendId, id);
+        }
+        sqlQuery = "DELETE FROM FRIENDSHIPS WHERE USER_ID = ?";  // Удаляю у user всех друзей
+        jdbcTemplate.update(sqlQuery, id);
     }
 
     @Override
@@ -80,36 +81,26 @@ public class UserDbStorage implements UserStorage {
     @Override
     public User delete(User user) {
         int id = user.getId();
-        String sqlQueryDeleteInUsers = "DELETE FROM USERS WHERE USER_ID = ?";
-        jdbcTemplate.update(sqlQueryDeleteInUsers, id);
-
         deleteFriends(id);
+
+        String sqlQuery = "DELETE FROM USERS WHERE USER_ID = ?";
+        jdbcTemplate.update(sqlQuery, id);
         return user;
     }
 
     @Override
     public User update(User user) {
-        int id = user.getId();
-        if (user.getFriendships() == null || user.getFriendships().size() == 0) {
-            deleteFriends(id);
-        } else {
-            String sqlQueryOldFriends = "SELECT FRIEND_ID FROM FRIENDSHIPS WHERE FRIENDSHIPS_ID IN (" +
-                    "SELECT f.FRIENDSHIPS_ID FROM FRIENDS f WHERE f.USER_ID = ?)";
-            Set<Integer> oldfriends = new HashSet<>();
-            SqlRowSet userRows = jdbcTemplate.queryForRowSet(sqlQueryOldFriends, id);
-            if (userRows.next()) {
-                oldfriends.add(userRows.getInt("FRIEND_ID"));
-            }
-            for (Integer oldfriend : oldfriends) {
-                if (!user.getFriendships().keySet().contains(oldfriend)) {
-                    deleteFriends(oldfriend);
+        Integer id = user.getId();
+        deleteFriends(id);       // Удалю всех друзей у user
+
+        if (user.getFriendships() != null && user.getFriendships().size() > 0) { // Добавляю друзей к user
+            for (Map.Entry<Long, Boolean> friend : user.getFriendships().entrySet()) {
+                String sqlUpdate = "INSERT INTO FRIENDSHIPS (USER_ID, FRIEND_ID, CONFIRMATION) VALUES (?, ?, ?)";
+                jdbcTemplate.update(sqlUpdate, id, friend.getKey(), friend.getValue());
+                if (friend.getValue() == true) {
+                    sqlUpdate = "INSERT INTO FRIENDSHIPS (USER_ID, FRIEND_ID, CONFIRMATION) VALUES (?, ?, ?)";
+                    jdbcTemplate.update(sqlUpdate, friend.getKey(), id, friend.getValue());
                 }
-            }
-        }
-        if (user.getFriendships() != null && user.getFriendships().size() > 0) {
-            for (Map.Entry<Long, Integer> entry : user.getFriendships().entrySet()) {
-                String sqlUpdateFriend = "UPDATE FRIENDSHIPS SET CONFIRMATION = ? WHERE FRIEND_ID = ?";
-                jdbcTemplate.update(sqlUpdateFriend, entry.getValue(), entry.getKey());
             }
         }
         String sqlQuery = "UPDATE USERS SET USER_ID = ?, EMAIL = ?, LOGIN = ?, NAME = ?, BIRTHDAY=? where USER_ID = ?";
@@ -130,35 +121,26 @@ public class UserDbStorage implements UserStorage {
     }
 
     public void addFriend(Long id, Long friendId) {
-        String sqlQuery = "SELECT FRIEND_ID FROM FRIENDSHIPS fs " +
-                "WHERE FRIENDSHIPS_ID IN (SELECT f.FRIENDSHIPS_ID FROM FRIENDS f WHERE f.USER_ID = ?) " +
-                "AND fs.FRIEND_ID=?"; // получаю спискок друзей друга
-        SqlRowSet userRows = jdbcTemplate.queryForRowSet(sqlQuery, id.intValue(), friendId.intValue());
-        if (userRows.next()) {
+        String sqlQuery = "SELECT FRIEND_ID FROM FRIENDSHIPS WHERE USER_ID = ? AND FRIEND_ID = ?";// получаю друга usera
+        SqlRowSet userRows = jdbcTemplate.queryForRowSet(sqlQuery, id, friendId);
+        if (userRows.next()) { // Если друг уже есть, то просто выйти из метода
             return;
         }
-        sqlQuery = "UPDATE FRIENDSHIPS fs SET CONFIRMATION=? " +
-                "WHERE FRIENDSHIPS_ID IN (SELECT f.FRIENDSHIPS_ID FROM FRIENDS f WHERE f.USER_ID = ?) " +
-                "AND fs.CONFIRMATION=0"; // обновляю статус дружбы друга
-        int confirm = 0;
-        if (jdbcTemplate.update(sqlQuery, 1, friendId.intValue()) > 0) {
-            confirm = 1;
+        sqlQuery = "SELECT CONFIRMATION FROM FRIENDSHIPS WHERE USER_ID = ? AND FRIEND_ID = ?";
+        userRows = jdbcTemplate.queryForRowSet(sqlQuery, friendId, id);
+        Boolean confirm = false;
+        if (userRows.next()) { //
+            confirm = true;
+            sqlQuery = "UPDATE FRIENDSHIPS SET CONFIRMATION=? WHERE USER_ID = ? AND FRIEND_ID = ?";
+            jdbcTemplate.update(sqlQuery, confirm, friendId, id);
         }
 
-        SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
-                .withTableName("FRIENDSHIPS")
-                .usingGeneratedKeyColumns("FRIENDSHIPS_ID");
-        Map<String, Integer> params = Map.of("FRIEND_ID", friendId.intValue(), "CONFIRMATION", confirm);
-        Number friendshipsId = simpleJdbcInsert.executeAndReturnKey(params);
-
-        sqlQuery = "INSERT INTO FRIENDS (USER_ID, FRIENDSHIPS_ID) VALUES  (?,?)"; // добавляю friendshipsId и id в FRIENDS
-        jdbcTemplate.update(sqlQuery, id.intValue(), friendshipsId.intValue());
+        sqlQuery = "INSERT INTO FRIENDSHIPS (USER_ID, FRIEND_ID, CONFIRMATION) VALUES  (?,?,?)"; // добавляю friendshipsId и id в FRIENDS
+        jdbcTemplate.update(sqlQuery, id, friendId, confirm);
     }
 
     public void deleteFriend(Long id, Long friendId) {
-        String sqlQuery = "DELETE FROM FRIENDSHIPS fs " +
-                "WHERE FRIENDSHIPS_ID IN (SELECT f.FRIENDSHIPS_ID FROM FRIENDS f WHERE f.USER_ID = ?) " +
-                "AND fs.FRIEND_ID=?";
+        String sqlQuery = "DELETE FROM FRIENDSHIPS WHERE USER_ID=? AND FRIEND_ID=?";
         jdbcTemplate.update(sqlQuery, id, friendId);
         jdbcTemplate.update(sqlQuery, friendId, id);
     }

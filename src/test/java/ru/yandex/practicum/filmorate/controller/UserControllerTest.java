@@ -27,10 +27,9 @@ class UserControllerTest {
 
     @Test
     public void testFindUserById() {
-        Set<Long> friends = new HashSet<>();
-        Map<Long, Integer> friendships = new HashMap<>();
+        Map<Long, Boolean> friendships = new HashMap<>();
         LocalDate date = LocalDate.parse("1946-08-20");
-        User user = new User(1, "mail@mail.ru", "dolore", "Nick Name", date, friends, friendships);
+        User user = new User(1, "mail@mail.ru", "dolore", "Nick Name", date, friendships);
         userDbStorage.add(user);
 
         User userFromBd = userDbStorage.getListUsers().get(1);
@@ -44,10 +43,9 @@ class UserControllerTest {
 
     @Test
     public void delete() {
-        Set<Long> friends = new HashSet<>();
-        Map<Long, Integer> friendships = new HashMap<>();
+        Map<Long, Boolean> friendships = new HashMap<>();
         LocalDate date = LocalDate.parse("1946-08-20");
-        User user = new User(1, "mail@mail.ru", "dolore", "Nick Name", date, friends, friendships);
+        User user = new User(1, "mail@mail.ru", "dolore", "Nick Name", date, friendships);
         userDbStorage.add(user);
 
         User deleteUser = userDbStorage.delete(user);
@@ -56,14 +54,13 @@ class UserControllerTest {
 
     @Test
     public void update() {
-        Set<Long> friends = new HashSet<>();
-        Map<Long, Integer> friendships = new HashMap<>();
+        Map<Long, Boolean> friendships = new HashMap<>();
         LocalDate date = LocalDate.parse("1946-08-20");
-        User user = new User(1, "mail@mail.ru", "dolore", "Nick Name", date, friends, friendships);
+        User user = new User(1, "mail@mail.ru", "dolore", "Nick Name", date, friendships);
         userDbStorage.add(user);
 
         LocalDate dateUp = LocalDate.parse("1976-09-20");
-        User userUp = new User(1, "mail@yandex.ru", "doloreUpdate", "est adipisicing", dateUp, friends, friendships);
+        User userUp = new User(1, "mail@yandex.ru", "doloreUpdate", "est adipisicing", dateUp, friendships);
 
         User newUser = userDbStorage.update(userUp);
         assertEquals(1, newUser.getId());
@@ -75,15 +72,14 @@ class UserControllerTest {
 
     @Test
     public void getAll() {
-        Set<Long> friends = new HashSet<>();
-        Map<Long, Integer> friendships = new HashMap<>();
+        Map<Long, Boolean> friendships = new HashMap<>();
         LocalDate date = LocalDate.parse("1946-08-20");
-        User user = new User(1, "mail@mail.ru", "dolore", "Nick Name", date, friends, friendships);
+        User user = new User(1, "mail@mail.ru", "dolore", "Nick Name", date, friendships);
         userDbStorage.add(user);
 
         LocalDate otherDate = LocalDate.parse("1976-08-20");
         User otherUser = new User(2, "friend@mail.ru", "friend", "friend adipisicing", otherDate,
-                friends, friendships);
+                friendships);
         userDbStorage.add(otherUser);
 
         Map<Integer, User> allUser = userDbStorage.getListUsers();
@@ -103,47 +99,43 @@ class UserControllerTest {
 
     @Test
     public void addFriend() {
-        Set<Long> friends = new HashSet<>();
-        Map<Long, Integer> friendships = new HashMap<>();
+        Map<Long, Boolean> friendships = new HashMap<>();
         LocalDate date = LocalDate.parse("1946-08-20");
-        User user = new User(1, "mail@mail.ru", "dolore", "Nick Name", date, friends, friendships);
+        User user = new User(1, "mail@mail.ru", "dolore", "Nick Name", date, friendships);
         userDbStorage.add(user);
-
 
         LocalDate otherDate = LocalDate.parse("1976-08-20");
         User otherUser = new User(2, "friend@mail.ru", "friend", "friend adipisicing",
-                otherDate, friends, friendships);
+                otherDate, friendships);
         userDbStorage.add(otherUser); // добавляю в БД друга
         userDbStorage.addFriend(1L, 2L);  // добавляю юзеру  друга
 
         User userWithFriend = userDbStorage.getListUsers().get(1);
 
-        assertTrue(userWithFriend.getFriends().contains(2L));   // проверяю у юзер дружбу и подтверждение "1-подтвержд"
-        assertTrue(userWithFriend.getFriendships().containsKey(2L));
-        assertTrue(userWithFriend.getFriendships().containsValue(0));
+        assertTrue(userWithFriend.getFriendships().containsKey(2L)); // проверяю у юзер дружбу и подтверждение "true-подтвержд"
+        assertTrue(userWithFriend.getFriendships().containsValue(false));
 
         userDbStorage.addFriend(2L, 1L);   // добавляю  другу в друзья юзера
         User friend = userDbStorage.getListUsers().get(2);
 
-        assertTrue(friend.getFriends().contains(1L));  // проверяю у друга дружбу и подтверждение "1-подтвержд"
-        assertTrue(friend.getFriendships().containsKey(1L));
-        assertTrue(friend.getFriendships().containsValue(1));
+        assertTrue(friend.getFriendships().containsKey(1L));// проверяю у друга дружбу и подтверждение "true-подтвержд"
+        assertTrue(friend.getFriendships().containsValue(true));
 
         userWithFriend = userDbStorage.getListUsers().get(1);   // читаю из БД обновленное значения подтверждения дружбы
-        assertTrue(userWithFriend.getFriendships().containsValue(1));
+        assertTrue(userWithFriend.getFriendships().containsValue(true));
     }
 
     @Test
     public void deleteFriend() {
         Set<Long> friends = new HashSet<>();
-        Map<Long, Integer> friendships = new HashMap<>();
+        Map<Long, Boolean> friendships = new HashMap<>();
         LocalDate date = LocalDate.parse("1946-08-20");
-        User user = new User(1, "mail@mail.ru", "dolore", "Nick Name", date, friends, friendships);
+        User user = new User(1, "mail@mail.ru", "dolore", "Nick Name", date, friendships);
         userDbStorage.add(user);
 
         LocalDate otherDate = LocalDate.parse("1976-08-20");
         User otherUser = new User(2, "friend@mail.ru", "friend", "friend adipisicing",
-                otherDate, friends, friendships);
+                otherDate, friendships);
         userDbStorage.add(otherUser); // добавляю в БД друга
         userDbStorage.addFriend(1L, 2L);  // добавляю юзеру друга
 
@@ -153,11 +145,11 @@ class UserControllerTest {
 
         User userWithoutFriend = userDbStorage.getListUsers().get(1);
 
-        assertTrue(userWithoutFriend.getFriends().size() == 0);   // проверяю у юзер дружбу
+        assertTrue(userWithoutFriend.getFriendships().size() == 0);   // проверяю у юзер дружбу
 
         User friend = userDbStorage.getListUsers().get(2);
 
-        assertTrue(friend.getFriends().size() == 0);   // проверяю у друга дружбу
+        assertTrue(friend.getFriendships().size() == 0);   // проверяю у друга дружбу
 
     }
 }
