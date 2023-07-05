@@ -3,9 +3,7 @@ package ru.yandex.practicum.filmorate.dao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
-import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
@@ -20,10 +18,18 @@ import java.util.*;
 public class FilmDbStorage implements FilmStorage {
 
     private final JdbcTemplate jdbcTemplate;
+    private final MpaDbStorage mpaDbStorage;
+    private final GenreDbStorage genreDbStorage;
+    private final LikeDbStorage likeDbStorage;
+
 
     @Autowired
-    public FilmDbStorage(JdbcTemplate jdbcTemplate) {
+    public FilmDbStorage(JdbcTemplate jdbcTemplate, MpaDbStorage mpaDbStorage,
+                         GenreDbStorage genreDbStorage, LikeDbStorage likeDbStorage) {
         this.jdbcTemplate = jdbcTemplate;
+        this.mpaDbStorage = mpaDbStorage;
+        this.genreDbStorage = genreDbStorage;
+        this.likeDbStorage = likeDbStorage;
     }
 
     public HashMap<Integer, Film> getListFilms() {
@@ -54,45 +60,15 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     private LinkedHashSet<Long> makeLike(Integer id) {
-        LinkedHashSet<Long> userIdsWhoLiked = new LinkedHashSet<>();
-
-        String sqlQuery = "SELECT u.USER_ID FROM FILMS f " +
-                "JOIN USERWHOLIKED u ON f.FILM_ID=u.FILM_ID " +
-                "WHERE f.FILM_ID =?";
-        SqlRowSet likeRows = jdbcTemplate.queryForRowSet(sqlQuery, id);
-        while (likeRows.next()) {
-            Long userId = likeRows.getLong("user_id");
-            userIdsWhoLiked.add(userId);
-        }
-        return userIdsWhoLiked;
+        return likeDbStorage.makeLike(id);
     }
 
     private LinkedHashSet<Genre> makeGenre(Integer id) {
-        LinkedHashSet<Genre> genres = new LinkedHashSet<>();
-
-        String sqlQuery = "SELECT g.GENRE_ID, g.NAME FROM FILM_GENRE fg " +      // устанавливаем жанры
-                "JOIN GENRE g ON fg.GENRE_ID=g.GENRE_ID " +
-                "WHERE fg.FILM_ID =?";
-        SqlRowSet genreRows = jdbcTemplate.queryForRowSet(sqlQuery, id);
-
-        while (genreRows.next()) {
-            Integer genreId = genreRows.getInt("genre_id");
-            String nameGenre = genreRows.getString("name");
-            Genre genre = new Genre(genreId, nameGenre);
-            genres.add(genre);
-        }
-        return genres;
+        return genreDbStorage.makeGenre(id);
     }
 
     private Mpa makeMpa(Integer mpaId, Integer id) {
-
-        String sqlQuery = "SELECT m.NAME FROM FILMS f JOIN MPA m ON m.MPA_ID=f.MPA_ID WHERE f.FILM_ID =?";
-        SqlRowSet mpaRows = jdbcTemplate.queryForRowSet(sqlQuery, id);
-        String nameMpa = null;
-        if (mpaRows.next()) {
-            nameMpa = mpaRows.getString("name");
-        }
-        return new Mpa(mpaId, nameMpa);
+        return mpaDbStorage.makeMpa(mpaId, id);
     }
 
     @Override
@@ -171,58 +147,26 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     public void addLike(Long id, Long userId) {
-        deleteLike(id, userId);
-        String sqlQuery = "INSERT INTO USERWHOLIKED (FILM_ID, USER_ID) VALUES  (?,?)";  // вставляю лайк
-        jdbcTemplate.update(sqlQuery, id, userId);
+        likeDbStorage.addLike(id, userId);
     }
 
     public void deleteLike(Long id, Long userId) {
-        String sqlQuery = "DELETE FROM USERWHOLIKED WHERE FILM_ID=? AND USER_ID=?";
-        jdbcTemplate.update(sqlQuery, id, userId);
+        likeDbStorage.deleteLike(id, userId);
     }
 
     public Mpa getMpa(Integer id) {  // Возвращаю название MPA по id
-        String sqlQuery = "SELECT MPA_ID, NAME FROM MPA WHERE MPA_ID =?";
-        SqlRowSet mpaRows = jdbcTemplate.queryForRowSet(sqlQuery, id);
-        if (!mpaRows.next()) {
-            throw new NotFoundException(String.format("Нет такого идентификатора № %s", id));
-        }
-
-        String name = mpaRows.getString("name");
-        return new Mpa(id, name);
+        return mpaDbStorage.getMpa(id);
     }
 
     public List<Mpa> getAllMpa() {  // Возвращаю все название MPA
-        List<Mpa> allMpa = new LinkedList<>();
-        String sqlQuery = "SELECT * FROM MPA";
-        SqlRowSet mpaRows = jdbcTemplate.queryForRowSet(sqlQuery);
-        while (mpaRows.next()) {
-            Integer id = mpaRows.getInt("mpa_id");
-            String name = mpaRows.getString("name");
-            allMpa.add(new Mpa(id, name));
-        }
-        return allMpa;
+        return mpaDbStorage.getAllMpa();
     }
 
     public Genre getGenresById(Integer id) {  // Возвращаю название жанра по id
-        String sqlQuery = "SELECT GENRE_ID, NAME FROM GENRE WHERE GENRE_ID =?";
-        SqlRowSet genreRows = jdbcTemplate.queryForRowSet(sqlQuery, id);
-        if (!genreRows.next()) {
-            throw new NotFoundException(String.format("Нет такого идентификатора № %s", id));
-        }
-        String name = genreRows.getString("name");
-        return new Genre(id, name);
+        return genreDbStorage.getGenresById(id);
     }
 
     public LinkedHashSet<Genre> getAllGenres() {  // Возвращаю все жанры
-        LinkedHashSet<Genre> genres = new LinkedHashSet<>();
-        String sqlQuery = "SELECT * FROM GENRE";
-        SqlRowSet genreRows = jdbcTemplate.queryForRowSet(sqlQuery);
-        while (genreRows.next()) {
-            Integer id = genreRows.getInt("genre_id");
-            String name = genreRows.getString("name");
-            genres.add(new Genre(id, name));
-        }
-        return genres;
+        return genreDbStorage.getAllGenres();
     }
 }
