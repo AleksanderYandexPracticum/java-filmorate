@@ -4,24 +4,27 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.dao.FilmDbStorage;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
 
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
-@Service
-public class FilmService {
-    private final InMemoryFilmStorage inMemoryFilmStorage;
+@Service("filmDaoService")
+public class FilmDaoService {
+
+    private final FilmDbStorage filmDbStorage;
 
     @Autowired
-    public FilmService(@Qualifier("inMemoryFilmStorage")FilmStorage filmStorage) {
-        this.inMemoryFilmStorage = (InMemoryFilmStorage) filmStorage;
+    public FilmDaoService(@Qualifier("filmDao") FilmStorage filmStorage) {
+        this.filmDbStorage = (FilmDbStorage) filmStorage;
     }
 
     public void validationFilm(Film film) {
@@ -45,34 +48,34 @@ public class FilmService {
     }
 
     public void validationIdFilm(Film film) {
-        if (!inMemoryFilmStorage.getListFilms().containsKey(film.getId())) {
+        if (!filmDbStorage.getListFilms().containsKey(film.getId())) {
             log.info("Нет такого идентификатора");
             throw new NotFoundException(String.format("Нет такого идентификатора № %s", film.getId()));
         }
     }
 
     public void validationIdFilm(Long id) {
-        if (!inMemoryFilmStorage.getListFilms().containsKey(id.intValue())) {
+        if (!filmDbStorage.getListFilms().containsKey(id.intValue())) {
             log.info("Нет такого идентификатора");
             throw new NotFoundException(String.format("Нет такого идентификатора № %s", id));
         }
     }
 
     public Film getFilm(Long id) {  //получение данных о фильме по иго уникальному идентификатору
-        return inMemoryFilmStorage.getListFilms().get(id.intValue());
+        return filmDbStorage.getListFilms().get(id.intValue());
     }
 
     public void addLike(Long id, Long userId) {  //пользователь ставит лайк фильму
-        inMemoryFilmStorage.getListFilms().get(id.intValue()).getUserIdsWhoLiked().add(userId);
+        filmDbStorage.addLike(id, userId);
     }
 
     public void deleteLike(Long id, Long userId) {  //пользователь удаляет лайк
-        inMemoryFilmStorage.getListFilms().get(id.intValue()).getUserIdsWhoLiked().remove(userId);
+        filmDbStorage.deleteLike(id, userId);
     }
 
     public List<Film> getFilms(int count) {  //возвращает список из первых count фильмов по количеству лайков.
         // Если значение параметра count не задано, верните первые 10.
-        List<Film> films = new ArrayList<>(inMemoryFilmStorage.getListFilms().values())
+        List<Film> films = new ArrayList<>(filmDbStorage.getListFilms().values())
                 .stream()
                 .sorted((p0, p1) -> ((Integer) p1.getUserIdsWhoLiked().size()).compareTo(p0.getUserIdsWhoLiked().size()))
                 .limit(count)
@@ -81,18 +84,34 @@ public class FilmService {
     }
 
     public Film addFilm(Film film) {
-        return inMemoryFilmStorage.add(film);
+        return filmDbStorage.add(film);
     }
 
     public Film deleteFilm(Film film) {
-        return inMemoryFilmStorage.delete(film);
+        return filmDbStorage.delete(film);
     }
 
     public Film updateFilm(Film film) {
-        return inMemoryFilmStorage.update(film);
+        return filmDbStorage.update(film);
     }
 
     public Collection<Film> getAllFilm() {
-        return inMemoryFilmStorage.getListFilms().values();
+        return filmDbStorage.getListFilms().values();
+    }
+
+    public Mpa getMpa(Integer id) { // Получение mpa по id
+        return filmDbStorage.getMpa(id);
+    }
+
+    public List<Mpa> getAllMpa() { // Получение всех mpa
+        return filmDbStorage.getAllMpa();
+    }
+
+    public Genre getGenresById(Integer id) { // Получение genre по id
+        return filmDbStorage.getGenresById(id);
+    }
+
+    public LinkedHashSet<Genre> getAllGenres() { // Получение всех genre
+        return filmDbStorage.getAllGenres();
     }
 }

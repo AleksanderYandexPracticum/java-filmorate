@@ -2,96 +2,96 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.service.FilmDaoService;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Slf4j
 @RestController()
-@RequestMapping("/films")
+@RequestMapping()
 public class FilmController {
 
-    private final FilmService filmService;
+    private final FilmDaoService filmDaoService;
 
     @Autowired
-    public FilmController(FilmService filmService) {
-        this.filmService = filmService;
+    public FilmController(@Qualifier("filmDaoService") FilmDaoService filmDaoService) {
+        this.filmDaoService = filmDaoService;
     }
 
-    public FilmService getFilmService() {
-        return filmService;
+    public FilmDaoService getFilmDaoService() {
+        return filmDaoService;
     }
 
-    @PostMapping
+    @PostMapping("/films")
     public Film addFilm(HttpServletRequest request, @RequestBody Film film) {
         log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
-        filmService.validationFilm(film);
-        Film returnFilm = filmService.addFilm(film);
+        filmDaoService.validationFilm(film);
+        Film returnFilm = filmDaoService.addFilm(film);
         return returnFilm;
     }
 
-    @DeleteMapping
+    @DeleteMapping("/films")
     public Film deleteFilm(HttpServletRequest request, @RequestBody Film film) {
         log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
-        filmService.validationFilm(film);
-        filmService.validationIdFilm(film);
-        Film returnFilm = filmService.deleteFilm(film);
+        filmDaoService.validationFilm(film);
+        filmDaoService.validationIdFilm(film);
+        Film returnFilm = filmDaoService.deleteFilm(film);
         return returnFilm;
     }
 
-    @PutMapping
+    @PutMapping("/films")
     public Film updateFilm(HttpServletRequest request, @RequestBody Film film) {
         log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
-        filmService.validationFilm(film);
-        filmService.validationIdFilm(film);
-        Film returnFilm = filmService.updateFilm(film);
+        filmDaoService.validationFilm(film);
+        filmDaoService.validationIdFilm(film);
+        Film returnFilm = filmDaoService.updateFilm(film);
         return returnFilm;
     }
 
-    @GetMapping
+    @GetMapping("/films")
     public List<Film> getAllFilm(HttpServletRequest request) {
         log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
-        return new ArrayList<>(filmService.getAllFilm());
+        return new ArrayList<>(filmDaoService.getAllFilm());
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/films/{id}")
     public Film getFilmById(HttpServletRequest request, @PathVariable("id") Long id) {
         log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
-        filmService.validationIdFilm(id);
-        return filmService.getFilm(id);
+        filmDaoService.validationIdFilm(id);
+        return filmDaoService.getFilm(id);
     }
 
-    @PutMapping("/{id}/like/{userId}")
+    @PutMapping("/films/{id}/like/{userId}")
     public void likeFilm(HttpServletRequest request, @PathVariable("id") Long id, @PathVariable("userId") Long userId) {
         log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
-        filmService.validationIdFilm(id);
-        filmService.addLike(id, userId);
+        filmDaoService.validationIdFilm(id);
+        filmDaoService.addLike(id, userId);
     }
 
-    @DeleteMapping("/{id}/like/{userId}")
+    @DeleteMapping("/films/{id}/like/{userId}")
     public void deleteFilm(HttpServletRequest request, @PathVariable("id") Long id, @PathVariable("userId") Long userId) {
         log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
-        filmService.validationIdFilm(id);
-        filmService.validationIdFilm(userId);
-        filmService.deleteLike(id, userId);
+        filmDaoService.validationIdFilm(id);
+        filmDaoService.validationIdFilm(userId);
+        filmDaoService.deleteLike(id, userId);
     }
 
-    @GetMapping("/popular")
+    @GetMapping("/films/popular")
     public List<Film> getPopularFilms(HttpServletRequest request,
                                       @RequestParam(defaultValue = "10") int count) {
         log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
-        return filmService.getFilms(count);
+        return filmDaoService.getFilms(count);
     }
 }

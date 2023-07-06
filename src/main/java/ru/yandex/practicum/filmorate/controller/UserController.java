@@ -2,9 +2,10 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.service.UserDaoService;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
@@ -16,23 +17,23 @@ import java.util.List;
 @RequestMapping("/users")
 public class UserController {
 
-    private final UserService userService;
+    private final UserDaoService userDaoService;
 
     @Autowired
-    public UserController(UserService userService) {
-        this.userService = userService;
+    public UserController(@Qualifier("userDaoService") UserDaoService userDaoService) {
+        this.userDaoService = userDaoService;
     }
 
-    public UserService getUserService() {
-        return userService;
+    public UserDaoService getUserDaoService() {
+        return userDaoService;
     }
 
     @PostMapping
     public User addUser(HttpServletRequest request, @RequestBody User user) {
         log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
-        userService.validationUser(user);
-        User returnUser = userService.addUser(user);
+        userDaoService.validationUser(user);
+        User returnUser = userDaoService.addUser(user);
         return returnUser;
     }
 
@@ -40,9 +41,9 @@ public class UserController {
     public User deleteUser(HttpServletRequest request, @RequestBody User user) {
         log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
-        userService.validationUser(user);
-        userService.validationIdUser(user);
-        User returnUser = userService.deleteUser(user);
+        userDaoService.validationUser(user);
+        userDaoService.validationIdUser(user);
+        User returnUser = userDaoService.deleteUser(user);
         return returnUser;
     }
 
@@ -50,9 +51,9 @@ public class UserController {
     public User updateUser(HttpServletRequest request, @RequestBody User user) {
         log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
-        userService.validationUser(user);
-        userService.validationIdUser(user);
-        User returnUser = userService.updateUser(user);
+        userDaoService.validationUser(user);
+        userDaoService.validationIdUser(user);
+        User returnUser = userDaoService.updateUser(user);
         return returnUser;
     }
 
@@ -61,15 +62,15 @@ public class UserController {
         log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
 
-        return new ArrayList<>(userService.getAllUser());
+        return new ArrayList<>(userDaoService.getAllUser());
     }
 
     @GetMapping("/{id}")
     public User getUser(HttpServletRequest request, @PathVariable("id") Long id) {
         log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
-        userService.validationIdUser(id);
-        return userService.getUser(id);
+        userDaoService.validationIdUser(id);
+        return userDaoService.getUser(id);
     }
 
     @PutMapping("/{id}/friends/{friendId}")
@@ -78,9 +79,9 @@ public class UserController {
                           @PathVariable("friendId") Long friendId) {
         log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
-        userService.validationIdUser(id);
-        userService.validationIdUser(friendId);
-        userService.addFriend(id, friendId);
+        userDaoService.validationIdUser(id);
+        userDaoService.validationIdUser(friendId);
+        userDaoService.addFriend(id, friendId);
     }
 
     @DeleteMapping("/{id}/friends/{friendId}")
@@ -89,17 +90,17 @@ public class UserController {
                              @PathVariable("friendId") Long friendId) {
         log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
-        userService.validationIdUser(id);
-        userService.validationIdUser(friendId);
-        userService.deleteFriend(id, friendId);
+        userDaoService.validationIdUser(id);
+        userDaoService.validationIdUser(friendId);
+        userDaoService.deleteFriend(id, friendId);
     }
 
     @GetMapping("/{id}/friends")
     public List<User> getAllFriendsCurrentUser(HttpServletRequest request, @PathVariable("id") Long id) {
         log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
-        userService.validationIdUser(id);
-        return userService.getAllFriendsCurrentUser(id);
+        userDaoService.validationIdUser(id);
+        return userDaoService.getAllFriendsCurrentUser(id);
     }
 
     @GetMapping("/{id}/friends/common/{otherId}")
@@ -108,7 +109,6 @@ public class UserController {
                                            @PathVariable("otherId") Long otherId) {
         log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
-
-        return userService.getCommonFriendsList(id, otherId);
+        return userDaoService.getCommonFriendsList(id, otherId);
     }
 }
